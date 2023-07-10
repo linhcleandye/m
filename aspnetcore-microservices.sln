@@ -79,6 +79,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Saga.Orchestrator", "Saga.O
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Saga.Orchestrator", "src\Saga.Orchestrator\Saga.Orchestrator\Saga.Orchestrator.csproj", "{17656F0B-F6BD-4B2F-8424-8A483B26175F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YarpApiGw", "src\ApiGateways\YarpApiGw\YarpApiGw.csproj", "{08BFBAB0-44E1-4332-A398-36F548D3613D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -157,6 +159,10 @@ Global
 		{17656F0B-F6BD-4B2F-8424-8A483B26175F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17656F0B-F6BD-4B2F-8424-8A483B26175F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17656F0B-F6BD-4B2F-8424-8A483B26175F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08BFBAB0-44E1-4332-A398-36F548D3613D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08BFBAB0-44E1-4332-A398-36F548D3613D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08BFBAB0-44E1-4332-A398-36F548D3613D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08BFBAB0-44E1-4332-A398-36F548D3613D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,6 +198,7 @@ Global
 		{48EBF24A-DE14-420B-96AB-01799B9C78E3} = {2892DFB3-6D32-4371-AD85-32A4AA99B901}
 		{E1E4A661-1D47-44E0-A7C9-4CDB3CF31D9B} = {731E699E-62B0-413D-AB37-FAFF7BDBA602}
 		{17656F0B-F6BD-4B2F-8424-8A483B26175F} = {E1E4A661-1D47-44E0-A7C9-4CDB3CF31D9B}
+		{08BFBAB0-44E1-4332-A398-36F548D3613D} = {74DBFDBA-4B8F-40A7-8DC4-7AFE2FF33F26}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7597D2A6-D6CA-4C7B-87C0-ED7E94DCA0A9}
