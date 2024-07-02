@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   #database section
 
@@ -260,6 +258,16 @@ services:
     ports:
       - "6009:80"
     restart: always
+  
+  payment.api:
+    container_name: tedu_payment.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - "StripeConfig:ApiKey=sk_test_51LFsS1AmFcgLVFNzaPjFmLljGJ43vc228TewlvOZ14a2CArhgZHrN0tUpRouSfYT5JiuLaPO3yXpgQCxK7Lfv2p000stSVI2qu"
+    ports:
+      - "6011:80"
+    restart: always
 
   webstatus:
     container_name: webstatus
@@ -279,5 +287,7 @@ services:
       - HealthChecksUI__HealthChecks__5__Uri=http://hangfire.api/hc
       - HealthChecksUI__HealthChecks__6__Name=Identity Health Check
       - HealthChecksUI__HealthChecks__6__Uri=http://tedu.identity.api/hc
+      - HealthChecksUI__HealthChecks__7__Name=Payment Health Check
+      - HealthChecksUI__HealthChecks__7__Uri=http://payment.api/hc
     ports:
       - "6010:80"
