@@ -1,6 +1,8 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Shared.DTOs.Customer;
 
-public class CustomerDto
+public record CustomerDto
 {
     public string UserName { get; set; }
 
@@ -10,3 +12,13 @@ public class CustomerDto
 
     public string EmailAddress { get; set; }
 }
+
+public record CreateCustomerDto(
+    [Required] [StringLength(50)] string UserName,
+    [Required] [StringLength(50)] string FirstName,
+    [Required] [StringLength(150)] string LastName,
+    [Required]
+    [StringLength(250)]
+    [EmailAddress]
+    string EmailAddress
+);

@@ -8,5 +8,6 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<Entities.Customer, CustomerDto>();
+        CreateMap<CreateCustomerDto, Entities.Customer>();
     }
 }

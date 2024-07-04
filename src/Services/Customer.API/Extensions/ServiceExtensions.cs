@@ -1,8 +1,10 @@
+using Contracts.Domains.Interfaces;
 using Customer.API.Persistence;
 using Customer.API.Repositories;
 using Customer.API.Repositories.Interfaces;
 using Customer.API.Services;
 using Customer.API.Services.Interfaces;
+using Infrastructure.Common;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -34,7 +36,10 @@ public static class ServiceExtensions
 
     public static void AddInfrastructureServices(this IServiceCollection services)
     {
-        services.AddScoped<ICustomerRepository, CustomerRepository>()
+        services
+            .AddScoped(typeof(IRepositoryBase<,,>), typeof(RepositoryBase<,,>))
+            .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
+            .AddScoped<ICustomerRepository, CustomerRepository>()
             .AddScoped<ICustomerService, CustomerService>();
     }
 
@@ -45,5 +50,28 @@ public static class ServiceExtensions
             .AddNpgSql(databaseSettings.ConnectionString,
                 name: "PostgresQL Health",
                 failureStatus: HealthStatus.Degraded);
+    }
+
+    public static void ConfigureApiVersion(this IServiceCollection services)
+    {
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new(1.0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+        });
+    }
+    
+    public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+    {
+        var origins = configuration["AllowOrigins"] ?? throw new InvalidOperationException("AllowedOrigin is not set");;
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(buider =>
+            {
+                buider.WithOrigins(origins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
     }
 }

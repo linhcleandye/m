@@ -20,7 +20,14 @@ public class CustomerService : ICustomerService
     {
         var entity = await _repository.GetCustomerByUserNameAsync(username);
         var result = _mapper.Map<CustomerDto>(entity);
+        return result == null ? Results.NotFound() : Results.Ok(result);
+    }
 
+    public async Task<IResult> CreateCustomerAsync(CreateCustomerDto customerDto)
+    {
+        var entity = _mapper.Map<Entities.Customer>(customerDto);
+        await _repository.CreateAsync(entity);
+        var result = _mapper.Map<CustomerDto>(entity);
         return Results.Ok(result);
     }
 }

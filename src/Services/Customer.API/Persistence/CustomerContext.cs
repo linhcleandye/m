@@ -17,5 +17,17 @@ public class CustomerContext : DbContext
             .IsUnique();
         modelBuilder.Entity<Entities.Customer>().HasIndex(x => x.EmailAddress)
             .IsUnique();
+        modelBuilder.Entity<Entities.Customer>()
+            .Property(x => x.UserName)
+            .HasMaxLength(50);
+        modelBuilder.Entity<Entities.Customer>()
+            .Property(x => x.FirstName)
+            .HasMaxLength(50);
+        modelBuilder.Entity<Entities.Customer>()
+            .Property(x => x.LastName)
+            .HasMaxLength(150);
+        modelBuilder.Entity<Entities.Customer>()
+            .Property(x => x.EmailAddress)
+            .HasMaxLength(250);
     }
 }

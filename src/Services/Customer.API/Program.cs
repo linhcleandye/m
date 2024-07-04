@@ -25,13 +25,12 @@ try
     builder.Services.ConfigureCustomerContext();
     builder.Services.AddInfrastructureServices();
     builder.Services.ConfigureHealthChecks();
+    builder.Services.ConfigureApiVersion();
+    builder.Services.ConfigureCors(builder.Configuration);
 
     var app = builder.Build();
 
     app.MapGet("/", () => $"Welcome to {builder.Environment.ApplicationName}!");
-
-    app.MapCustomersAPI();
-
     // Configure the HTTP request pipeline.
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -55,6 +54,11 @@ try
         });
         endpoints.MapDefaultControllerRoute();
     });
+
+    app.UseMiddleware<RequestTimingMiddleware>();
+    
+    app.MapCustomersEndpoints();
+    app.UseCors();
 
     app.SeedCustomerData()
         .Run();

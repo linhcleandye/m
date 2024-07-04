@@ -2,7 +2,6 @@ using Contracts.Services;
 using Infrastructure.Configurations;
 using Microsoft.Extensions.Options;
 using Shared.DTOs.Payment;
-using Stripe;
 using Stripe.Checkout;
 using ILogger = Serilog.ILogger;
 namespace Payment.API.Services;

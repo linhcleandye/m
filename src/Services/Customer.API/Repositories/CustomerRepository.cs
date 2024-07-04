@@ -1,3 +1,4 @@
+using Contracts.Domains.Interfaces;
 using Customer.API.Persistence;
 using Customer.API.Repositories.Interfaces;
 using Infrastructure.Common;
@@ -5,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Customer.API.Repositories;
 
-public class CustomerRepository : RepositoryQueryBase<Entities.Customer, int, CustomerContext>, ICustomerRepository
+public class CustomerRepository : RepositoryBase<Entities.Customer, int, CustomerContext>, ICustomerRepository
 {
-    public CustomerRepository(CustomerContext dbContext) : base(dbContext)
+    public CustomerRepository(CustomerContext dbContext, IUnitOfWork<CustomerContext> unitOfWork) : base(dbContext, unitOfWork)
     {
     }
 
-    public Task<Entities.Customer> GetCustomerByUserNameAsync(string username)
+    public Task<Entities.Customer?> GetCustomerByUserNameAsync(string username)
     {
         return FindByCondition(x => x.UserName.Equals(username))
             .SingleOrDefaultAsync();
