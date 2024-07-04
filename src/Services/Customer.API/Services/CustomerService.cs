@@ -23,6 +23,13 @@ public class CustomerService : ICustomerService
         return result == null ? Results.NotFound() : Results.Ok(result);
     }
 
+    public async Task<IResult> GetCustomerAsync(int id)
+    {
+        var entity = await _repository.GetByIdAsync(id);
+        var result = _mapper.Map<CustomerDto>(entity);
+        return result == null ? Results.NotFound("Customer not found") : Results.Ok(result);
+    }
+
     public async Task<IResult> CreateCustomerAsync(CreateCustomerDto customerDto)
     {
         var entity = _mapper.Map<Entities.Customer>(customerDto);
@@ -35,7 +42,7 @@ public class CustomerService : ICustomerService
     {
         var existingCustomer = await _repository.GetByIdAsync(id);
         if (existingCustomer is null)
-            return Results.NotFound();
+            return Results.NotFound("Customer not found");
         
         var entity = _mapper.Map(customerDto, existingCustomer);
         await _repository.UpdateAsync(entity);

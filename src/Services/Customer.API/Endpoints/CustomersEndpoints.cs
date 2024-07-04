@@ -13,9 +13,13 @@ public static class CustomersEndpoints
             .HasApiVersion(1.0)
             .WithParameterValidation();
 
-        group.MapGet("/{username}",
+        group.MapGet("/username/{username}",
             async (string username, ICustomerService customerService) =>
                 await customerService.GetCustomerByUsernameAsync(username));
+        
+        group.MapGet("/{id}",
+            async (int id, ICustomerService customerService) =>
+                await customerService.GetCustomerAsync(id));
 
         group.MapPost("/",
             async ([FromBody]CreateCustomerDto customerDto, ICustomerService customerService) =>
