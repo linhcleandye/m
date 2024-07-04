@@ -350,6 +350,22 @@
         }
       ],
       "SwaggerKey": "inventory-service"
+    },
+    // Payment API : http://localhost:6011
+    {
+      "UpstreamPathTemplate": "/payments/create-checkout-session",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "DownstreamPathTemplate": "/api/payments/create-checkout-session",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 6011
+        }
+      ],
+      "SwaggerKey": "payment-service"
     }
   ],
   "SwaggerEndPoints": [
@@ -410,6 +426,16 @@
           "Name": "Inventory API",
           "Version": "v1",
           "Url": "http://inventory.product.api/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "payment-service",
+      "Config": [
+        {
+          "Name": "Payment API",
+          "Version": "v1",
+          "Url": "http://payment.api/swagger/v1/swagger.json"
         }
       ]
     }

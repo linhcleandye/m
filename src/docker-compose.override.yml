@@ -264,7 +264,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - "StripeConfig:ApiKey=sk_test_51LFsS1AmFcgLVFNzaPjFmLljGJ43vc228TewlvOZ14a2CArhgZHrN0tUpRouSfYT5JiuLaPO3yXpgQCxK7Lfv2p000stSVI2qu"
+      - "StripeConfig:ApiKey=sk_test_51LFsS1AmFcgLVFNzYGB6LhT24Vzn6vnQZX9BBAgQJtfah9sgEWB4plnCWDH6mVxb5D2rXRQmWcUYDzMnqbVnGmq600DSw1kmJ1"
     ports:
       - "6011:80"
     restart: always

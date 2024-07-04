@@ -324,6 +324,22 @@
         }
       ],
       "SwaggerKey": "inventory-service"
+    },
+    // Payment API : http://localhost:5011
+    {
+      "UpstreamPathTemplate": "/payments/create-checkout-session",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "DownstreamPathTemplate": "/api/payments/create-checkout-session",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5011
+        }
+      ],
+      "SwaggerKey": "payment-service"
     }
   ],
   "SwaggerEndPoints": [
@@ -386,6 +402,16 @@
           "Url": "http://localhost:5006/swagger/v1/swagger.json"
         }
       ]
-    }
+    },
+    {
+      "Key": "payment-service",
+      "Config": [
+        {
+          "Name": "Payment API",
+          "Version": "v1",
+          "Url": "http://localhost:5011/swagger/v1/swagger.json"
+        }
+      ]
+    },
   ]
 }

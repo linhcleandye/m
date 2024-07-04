@@ -1,3 +1,4 @@
+using Contracts.Services;
 using HealthChecks.UI.Client;
 using Infrastructure.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -15,7 +16,7 @@ try
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Host.AddAppConfigurations();
     builder.Services.AddConfigurationSettings(builder.Configuration);
-    builder.Services.AddScoped<StripeClientService>();
+    builder.Services.AddScoped<IPaymentService, StripeClientService>();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddControllers();

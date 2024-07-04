@@ -1,4 +1,4 @@
-using Payment.API.Services;
+using Contracts.Services;
 using Shared.DTOs.Payment;
 namespace Payment.API.Endpoints;
 
@@ -10,14 +10,14 @@ public static class PaymentEndpoints
             .WithTags("Payments");
         
         // GET ENDPOINTS
-        group.MapPost("/create-checkout-session", async (CreatePaymentRequest request, StripeClientService stripeClient) =>
+        group.MapPost("/create-checkout-session", async (CreatePaymentRequest request, IPaymentService paymentService) =>
         {
             // TODO: create a 'Payment' record in the database to store a summary of this payment.
             // TODO: set it's status to 'Pending' or 'Processing'.
             
-            var checkoutUrl = await stripeClient.Checkout(request);
+            var response = await paymentService.Checkout(request);
 
-            return Results.Ok(new CreatePaymentResponse(checkoutUrl));
+            return Results.Ok(response);
         });
 
         return group;

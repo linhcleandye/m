@@ -1,3 +1,4 @@
+using Contracts.Services;
 using Infrastructure.Configurations;
 using Microsoft.Extensions.Options;
 using Shared.DTOs.Payment;
@@ -6,7 +7,7 @@ using Stripe.Checkout;
 using ILogger = Serilog.ILogger;
 namespace Payment.API.Services;
 
-public class StripeClientService
+public class StripeClientService : IPaymentService
 {
     private readonly StripeConfig _stripeConfig;
     private readonly ILogger _logger;
@@ -15,11 +16,9 @@ public class StripeClientService
     {
         _stripeConfig = stripeConfig.Value;
         _logger = logger;
-        
-        StripeConfiguration.ApiKey = _stripeConfig.ApiKey; // must set the API key
     }
 
-    public async Task<string> Checkout(CreatePaymentRequest request)
+    public async Task<CreatePaymentResponse> Checkout(CreatePaymentRequest request)
     {
         var options = new SessionCreateOptions
         {
@@ -32,7 +31,7 @@ public class StripeClientService
             Metadata = request.Metadata,
             SuccessUrl = request.SuccessRedirectUrl,
             CancelUrl = request.CancelRedirectUrl,
-            LineItems = request.Products.Select(product => new SessionLineItemOptions
+            LineItems = request.Products.Select(lineItem => new SessionLineItemOptions
             {
                 // Using Price and Product IDs on Stripe
                 // Price = "{{PRICE_ID}}",
@@ -40,19 +39,20 @@ public class StripeClientService
                 PriceData = new SessionLineItemPriceDataOptions
                 {
                     Currency = "aud",
-                    UnitAmountDecimal = product.Price * 100,
+                    UnitAmountDecimal = lineItem.Price * 100,
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
-                        Name = product.Name,
-                        Description = product.Description,
-                        Images = [product.ImageUrl],
+                        Name = lineItem.Name,
+                        Description = lineItem.Summary,
+                        Images = [lineItem.ImageUrl],
                     },
                 },
-                Quantity = request.Quantity,
+                Quantity = lineItem.Quantity
             }).ToList()
         };
 
         var checkoutSession = await new SessionService().CreateAsync(options);
-        return checkoutSession.Url;
+        _logger.Information("Stripe Checkout Session created: {CheckoutSessionId}", checkoutSession.Id);
+        return new CreatePaymentResponse(checkoutSession.Url, checkoutSession.Id);
     }
 }
