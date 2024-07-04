@@ -30,4 +30,15 @@ public class CustomerService : ICustomerService
         var result = _mapper.Map<CustomerDto>(entity);
         return Results.Ok(result);
     }
+
+    public async Task<IResult> UpdateCustomerAsync(int id, UpdateCustomerDto customerDto)
+    {
+        var existingCustomer = await _repository.GetByIdAsync(id);
+        if (existingCustomer is null)
+            return Results.NotFound();
+        
+        var entity = _mapper.Map(customerDto, existingCustomer);
+        await _repository.UpdateAsync(entity);
+        return Results.NoContent();
+    }
 }

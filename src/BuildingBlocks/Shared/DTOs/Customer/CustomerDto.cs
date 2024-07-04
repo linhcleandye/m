@@ -22,3 +22,8 @@ public record CreateCustomerDto(
     [EmailAddress]
     string EmailAddress
 );
+
+public record UpdateCustomerDto(
+    [Required] [StringLength(50)] string FirstName,
+    [Required] [StringLength(150)] string LastName
+);

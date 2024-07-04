@@ -1,4 +1,5 @@
 using Customer.API.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Customer;
 
 namespace Customer.API.Controllers;
@@ -17,7 +18,11 @@ public static class CustomersEndpoints
                 await customerService.GetCustomerByUsernameAsync(username));
 
         group.MapPost("/",
-            async (CreateCustomerDto customerDto, ICustomerService customerService) =>
+            async ([FromBody]CreateCustomerDto customerDto, ICustomerService customerService) =>
                 await customerService.CreateCustomerAsync(customerDto));
+        
+        group.MapPut("/{id}",
+            async (int id, [FromBody]UpdateCustomerDto customerDto, ICustomerService customerService) =>
+                await customerService.UpdateCustomerAsync(id, customerDto));
     }
 }
