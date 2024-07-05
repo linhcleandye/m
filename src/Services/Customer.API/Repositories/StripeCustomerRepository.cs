@@ -12,4 +12,7 @@ public class StripeCustomerRepository(CustomerService stripeCustomerService) : I
 
     public Task<Stripe.Customer> UpdateAsync(string id, CustomerUpdateOptions options)
         => stripeCustomerService.UpdateAsync(id, options);
+
+    public Task<Stripe.Customer> DeleteAsync(string id, CustomerDeleteOptions? options)
+        => stripeCustomerService.DeleteAsync(id, options);
 }

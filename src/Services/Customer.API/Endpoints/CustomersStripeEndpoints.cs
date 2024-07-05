@@ -9,12 +9,14 @@ public static class CustomersStripeEndpoints
         var group = routes.NewVersionedApi()
             .MapGroup("/api/stripe/customers")
             .HasApiVersion(1.0)
-            .WithParameterValidation();
+            .WithParameterValidation()
+            .WithTags("StripeCustomers");
 
         group.MapGet("/{id}",
             async (string id,
                     ICustomerStripeService customerService) =>
-                await customerService.GetByIdAsync(id));
+                await customerService.GetByIdAsync(id))
+            .WithName("GetStripeCustomerById");
         
         group.MapPatch("/sync-customers/{id}/customers/{customerId:int}",
             async ([Required]string id, [Required]int customerId,

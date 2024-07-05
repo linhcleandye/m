@@ -1,4 +1,5 @@
 using AutoMapper;
+using Customer.API.Controllers;
 using Customer.API.Exceptions;
 using Customer.API.Repositories.Interfaces;
 using Customer.API.Services.Interfaces;
@@ -65,7 +66,7 @@ public class CustomerService(
         entity.StripeCustomerId = entity.StripeCustomer.Id;
         await repository.SaveChangesAsync();
         var result = mapper.Map<CustomerDto>(entity);
-        return Results.Ok(result);
+        return Results.CreatedAtRoute(ApiEndpoints.Customers.GetCustomerById, new { id = entity.Id }, result);
     }
 
     private async Task<Stripe.Customer> CreateStripeCustomerAsync(CustomerDto customerDto)
@@ -76,7 +77,7 @@ public class CustomerService(
         var stripeCustomer = new CustomerCreateOptions
         {
             Email = customerDto.EmailAddress,
-            Name = customerDto.FullName,
+            Name = customerDto.FullName(),
             Address = addressOptions,
             Shipping = shippingOptions,
         };
@@ -91,7 +92,7 @@ public class CustomerService(
         => new()
         {
             Address = mapper.Map<AddressOptions>(customerDto.StripeCustomer.Shipping),
-            Name = customerDto.FullName,
+            Name = customerDto.FullName()
         };
 
     public async Task<IResult> UpdateAsync(int id, UpdateCustomerDto customerDto)
@@ -100,16 +101,19 @@ public class CustomerService(
         if (existingCustomer is null)
             throw new NotFoundException(id);
 
-        if (!string.IsNullOrEmpty(customerDto.StripeCustomerId))
-            await UpdateStripeCustomerAsync(customerDto, existingCustomer);
-
         var entity = mapper.Map(customerDto, existingCustomer);
+        if (!string.IsNullOrEmpty(customerDto.StripeCustomerId))
+        {
+            var stripeCustomer = await UpdateStripeCustomerAsync(customerDto, existingCustomer);
+            entity.StripeCustomer = stripeCustomer;
+        }
+        
         await repository.UpdateAsync(entity);
-
-        return Results.NoContent();
+        var result = mapper.Map<CustomerDto>(entity);
+        return Results.AcceptedAtRoute(ApiEndpoints.Customers.GetCustomerById, new { id = entity.Id }, result);
     }
 
-    private async Task UpdateStripeCustomerAsync(UpdateCustomerDto customerDto, Entities.Customer existingCustomer)
+    private async Task<Stripe.Customer> UpdateStripeCustomerAsync(UpdateCustomerDto customerDto, Entities.Customer existingCustomer)
     {
         existingCustomer.StripeCustomer = await customerStripeRepository.GetByIdAsync(customerDto.StripeCustomerId);
         existingCustomer.StripeCustomer = mapper.Map<Stripe.Customer>(customerDto);
@@ -117,7 +121,7 @@ public class CustomerService(
         var shippingOptions = new ShippingOptions
         {
             Address = mapper.Map<AddressOptions>(customerDto.Shipping),
-            Name = customerDto.FullName,
+            Name = customerDto.FullName(),
             Phone = customerDto.Phone
         };
 
@@ -128,7 +132,7 @@ public class CustomerService(
             Phone = customerDto.Phone,
         };
 
-        await customerStripeRepository.UpdateAsync(customerDto.StripeCustomerId, updateOptions);
+        return await customerStripeRepository.UpdateAsync(customerDto.StripeCustomerId, updateOptions);
     }
 
     public async Task<IResult> DeleteAsync(int id)
@@ -137,6 +141,9 @@ public class CustomerService(
         if (existingCustomer is null)
             throw new NotFoundException(id);
 
+        if (!string.IsNullOrEmpty(existingCustomer.StripeCustomerId))
+            await customerStripeRepository.DeleteAsync(existingCustomer.StripeCustomerId, null);
+        
         await repository.DeleteAsync(existingCustomer);
         return Results.NoContent();
     }
