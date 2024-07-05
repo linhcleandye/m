@@ -3,10 +3,11 @@ using Customer.API.Exceptions;
 using Customer.API.Repositories.Interfaces;
 using Customer.API.Services.Interfaces;
 using Shared.DTOs.Customer;
+using Shared.DTOs.Customer.Stripe;
 
 namespace Customer.API.Services;
 
-public class CustomerService(ICustomerRepository repository, IMapper mapper) : ICustomerService
+public class CustomerService(ICustomerRepository repository, IMapper mapper, ICustomerStripeService customerStripeService) : ICustomerService
 {
     public async Task<IResult> GetByUsernameAsync(string username)
     {
@@ -18,7 +19,16 @@ public class CustomerService(ICustomerRepository repository, IMapper mapper) : I
     public async Task<IResult> GetAsync(int id)
     {
         var entity = await repository.GetByIdAsync(id);
+        if (entity is null) throw new NotFoundException(id);
+        
         var result = mapper.Map<CustomerDto>(entity);
+        if (!string.IsNullOrEmpty(entity.StripeCustomerId))
+        {
+            entity.StripeCustomer = await customerStripeService.GetCustomerByIdAsync(entity.StripeCustomerId!);
+            var stripeCustomerDto = mapper.Map<StripeCustomerDto>(entity.StripeCustomer);
+            result.StripeCustomer = stripeCustomerDto;
+        }
+        
         return result == null ? throw new NotFoundException(id) : Results.Ok(result);
     }
     

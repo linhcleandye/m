@@ -16,7 +16,7 @@ public static class CustomersStripeEndpoints
                     ICustomerStripeService customerService) =>
                 await customerService.GetByIdAsync(id));
         
-        group.MapGet("/sync-customers/{id}/customers/{customerId:int}",
+        group.MapPatch("/sync-customers/{id}/customers/{customerId:int}",
             async ([Required]string id, [Required]int customerId,
                     ICustomerStripeService customerService) =>
                 await customerService.SyncByIdAsync(id, customerId));

@@ -16,15 +16,12 @@ public class MappingProfile : Profile
             .IgnoreAllNonExisting();
 
         // Stripe Customer
+
         CreateMap<Stripe.Customer, StripeCustomerDto>()
             .ForMember(dest => dest.Shipping, opt => opt.MapFrom(src => src.Shipping.Address))
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
             ;
         CreateMap<Stripe.Address, StripeCustomerAddressDto>();
         CreateMap<Stripe.Shipping, StripeCustomerAddressDto>();
-        
-        CreateMap<Stripe.Customer, Entities.Customer>()
-            // .ForMember(dest => dest.StripeCustomer, opt => opt.MapFrom(src => src))
-            ;
     }
 }

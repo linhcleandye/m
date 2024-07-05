@@ -29,14 +29,5 @@ public class CustomerContext : DbContext
         modelBuilder.Entity<Entities.Customer>()
             .Property(x => x.EmailAddress)
             .HasMaxLength(250);
-
-        // modelBuilder.Entity<Entities.Customer>().OwnsOne(
-        //         customer => customer.StripeCustomer, builder =>
-        //         {
-        //             builder.ToJson();
-        //             builder.OwnsOne(stripeCustomer => stripeCustomer.Address);
-        //             builder.OwnsOne(stripeCustomer => stripeCustomer.Shipping);
-        //         }
-        //     );
     }
 }
