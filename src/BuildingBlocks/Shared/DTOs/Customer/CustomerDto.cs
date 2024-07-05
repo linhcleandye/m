@@ -22,6 +22,7 @@ public record CreateCustomerDto(
 )
 {
     public string GetUserName() => string.IsNullOrWhiteSpace(UserName) ? EmailAddress : UserName;
+    public string FullName() => $"{FirstName} {LastName}";
 }
 
 public record UpdateCustomerDto(

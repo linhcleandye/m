@@ -60,7 +60,7 @@ public class CustomerService(
         var entity = mapper.Map<Entities.Customer>(customerDto);
         entity.StripeCustomer.Shipping.Address = mapper.Map<Address>(customerDto.Shipping);
         entity.StripeCustomer.Phone = entity.StripeCustomer.Shipping.Phone = customerDto.Phone;
-        repository.Create(entity);
+        await repository.CreateAsync(entity); // save customer to database to get the id
         
         entity.StripeCustomer = await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
         entity.StripeCustomerId = entity.StripeCustomer.Id;
@@ -73,6 +73,10 @@ public class CustomerService(
     {
         var addressOptions = GetAddressOptions(customerDto);
         var shippingOptions = GetShippingOptions(customerDto);
+        var metadata = new Dictionary<string, string>
+        {
+            {"customer_id", customerDto.Id.ToString()}
+        };
 
         var stripeCustomer = new CustomerCreateOptions
         {
@@ -80,6 +84,7 @@ public class CustomerService(
             Name = customerDto.FullName(),
             Address = addressOptions,
             Shipping = shippingOptions,
+            Metadata = metadata
         };
 
         return await customerStripeRepository.CreateAsync(stripeCustomer);
@@ -116,8 +121,10 @@ public class CustomerService(
     private async Task<Stripe.Customer> UpdateStripeCustomerAsync(UpdateCustomerDto customerDto, Entities.Customer existingCustomer)
     {
         existingCustomer.StripeCustomer = await customerStripeRepository.GetByIdAsync(customerDto.StripeCustomerId);
-        existingCustomer.StripeCustomer = mapper.Map<Stripe.Customer>(customerDto);
-
+        var metadata = new Dictionary<string, string>
+        {
+            {"customer_id", existingCustomer.Id.ToString()}
+        };
         var shippingOptions = new ShippingOptions
         {
             Address = mapper.Map<AddressOptions>(customerDto.Shipping),
@@ -127,9 +134,11 @@ public class CustomerService(
 
         var updateOptions = new CustomerUpdateOptions
         {
+            Name = customerDto.FullName(),
             Address = mapper.Map<AddressOptions>(customerDto.Address),
             Shipping = shippingOptions,
             Phone = customerDto.Phone,
+            Metadata = metadata,
         };
 
         return await customerStripeRepository.UpdateAsync(customerDto.StripeCustomerId, updateOptions);
