@@ -98,6 +98,22 @@
       ],
       "SwaggerKey": "customer-service"
     },
+    // Customer api: http://localhost:5003/stripe/customers
+    {
+      "UpstreamPathTemplate": "/stripe/customers/{id}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/stripe/customers/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "SwaggerKey": "customer-service"
+    },
     // Product api: http://localhost:5002/api/products
     {
       "UpstreamPathTemplate": "/products/{id}",

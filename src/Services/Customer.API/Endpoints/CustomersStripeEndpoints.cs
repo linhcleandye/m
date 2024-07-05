@@ -1,5 +1,5 @@
+using System.ComponentModel.DataAnnotations;
 using Customer.API.Services.Interfaces;
-
 namespace Customer.API.Controllers;
 
 public static class CustomersStripeEndpoints
@@ -15,5 +15,11 @@ public static class CustomersStripeEndpoints
             async (string id,
                     ICustomerStripeService customerService) =>
                 await customerService.GetByIdAsync(id));
+        
+        group.MapGet("/sync-customers/{id}/customers/{customerId:int}",
+            async ([Required]string id, [Required]int customerId,
+                    ICustomerStripeService customerService) =>
+                await customerService.SyncByIdAsync(id, customerId));
+        
     }
 }

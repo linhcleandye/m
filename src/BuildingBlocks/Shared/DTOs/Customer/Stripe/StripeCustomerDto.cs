@@ -1,11 +1,13 @@
 using System.Text.Json.Serialization;
 
-namespace Shared.DTOs.Customer;
+namespace Shared.DTOs.Customer.Stripe;
 
 public class StripeCustomerDto
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    public string Email { get; set; }
+    public string Currency { get; set; }
     public StripeCustomerAddressDto Address { get; set; }
     public Dictionary<string, string> Metadata { get; set; }
     public string Phone { get; set; }

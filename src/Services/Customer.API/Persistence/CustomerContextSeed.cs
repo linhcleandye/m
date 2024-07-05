@@ -28,8 +28,8 @@ public static class CustomerContextSeed
         string lastName, string email)
     {
         var customer = await customerContext.Customers
-            .SingleOrDefaultAsync(x => x.UserName.Equals(username) ||
-                                       x.EmailAddress.Equals(email));
+            .FirstOrDefaultAsync(x => x.UserName.Equals(username) ||
+                   x.EmailAddress.Equals(email));
         if (customer == null)
         {
             var newCustomer = new Entities.Customer
