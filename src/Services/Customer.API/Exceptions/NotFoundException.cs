@@ -2,4 +2,4 @@ using Infrastructure.Exceptions;
 
 namespace Customer.API.Exceptions;
 
-public class NotFoundException(int id) : EntityNotFoundException("Customer", id);
+public class NotFoundException(object id) : EntityNotFoundException("Customer", id);

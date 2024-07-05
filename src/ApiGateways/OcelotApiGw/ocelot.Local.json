@@ -50,13 +50,45 @@
       ],
       "SwaggerKey": "identity-service"
     },
-    // Customer api: http://localhost:5003/api/customers
+    // Customer api: http://localhost:6003/api/customers
     {
-      "UpstreamPathTemplate": "/customers/{username}",
+      "UpstreamPathTemplate": "/customers/username/{username}",
       "UpstreamHttpMethod": [
         "GET"
       ],
-      "DownstreamPathTemplate": "/api/customers/{username}",
+      "DownstreamPathTemplate": "/api/customers/username/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 6003
+        }
+      ],
+      "SwaggerKey": "customer-service"
+    },
+    {
+      "UpstreamPathTemplate": "/customers/{id}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/customers/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 6003
+        }
+      ],
+      "SwaggerKey": "customer-service"
+    },
+    {
+      "UpstreamPathTemplate": "/customers",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "DownstreamPathTemplate": "/api/customers",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {

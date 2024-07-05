@@ -58,6 +58,7 @@ try
     app.UseMiddleware<RequestTimingMiddleware>();
     
     app.MapCustomersEndpoints();
+    app.MapCustomersStripeEndpoints();
     app.UseCors();
 
     app.SeedCustomerData()

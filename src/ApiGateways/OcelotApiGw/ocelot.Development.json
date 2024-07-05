@@ -52,11 +52,43 @@
     },
     // Customer api: http://localhost:5003/customers
     {
-      "UpstreamPathTemplate": "/customers/{username}",
+      "UpstreamPathTemplate": "/customers/username/{username}",
       "UpstreamHttpMethod": [
         "GET"
       ],
-      "DownstreamPathTemplate": "/api/customers/{username}",
+      "DownstreamPathTemplate": "/api/customers/username/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "SwaggerKey": "customer-service"
+    },
+    {
+      "UpstreamPathTemplate": "/customers/{id}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/customers/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "SwaggerKey": "customer-service"
+    },
+    {
+      "UpstreamPathTemplate": "/customers",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "DownstreamPathTemplate": "/api/customers",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {

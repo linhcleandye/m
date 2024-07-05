@@ -5,10 +5,13 @@ using Customer.API.Repositories.Interfaces;
 using Customer.API.Services;
 using Customer.API.Services.Interfaces;
 using Infrastructure.Common;
+using Infrastructure.Configurations;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Shared.Configurations;
+using Stripe;
+using CustomerService = Customer.API.Services.CustomerService;
 
 namespace Customer.API.Extensions;
 
@@ -19,7 +22,17 @@ public static class ServiceExtensions
     {
         var databaseSettings = configuration.GetSection(nameof(DatabaseSettings))
             .Get<DatabaseSettings>();
+        if (databaseSettings is null)
+            throw new ArgumentNullException(nameof(databaseSettings), "Database settings are missing");
         services.AddSingleton(databaseSettings);
+        
+        var stripeOptions = configuration.GetSection(nameof(StripeConfig))
+            .Get<StripeConfig>();
+        if (stripeOptions is null)
+            throw new ArgumentNullException(nameof(stripeOptions), "Stripe configurations are missing");
+        
+        services.AddOptions<StripeConfig>().BindConfiguration(nameof(StripeConfig));
+        StripeConfiguration.ApiKey = stripeOptions.ApiKey;
 
         return services;
     }
@@ -40,7 +53,10 @@ public static class ServiceExtensions
             .AddScoped(typeof(IRepositoryBase<,,>), typeof(RepositoryBase<,,>))
             .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
             .AddScoped<ICustomerRepository, CustomerRepository>()
-            .AddScoped<ICustomerService, CustomerService>();
+            .AddScoped<ICustomerService, CustomerService>()
+            .AddScoped<ICustomerStripeService, CustomerStripeService>()
+            .AddScoped<Stripe.CustomerService>()
+            ;
     }
 
     public static void ConfigureHealthChecks(this IServiceCollection services)

@@ -52,6 +52,7 @@ public class ErrorWrappingMiddleware
         else if (!context.Response.HasStarted && context.Response.StatusCode != StatusCodes.Status204NoContent &&
                  context.Response.StatusCode != StatusCodes.Status202Accepted &&
                  context.Response.StatusCode != StatusCodes.Status200OK &&
+                 context.Response.StatusCode != StatusCodes.Status302Found &&
                  context.Response.ContentType != "text/html; charset=utf-8")
         {
             context.Response.ContentType = "application/json";

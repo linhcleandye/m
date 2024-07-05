@@ -2,26 +2,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shared.DTOs.Customer;
 
-public record CustomerDto
-{
-    public string UserName { get; set; }
-
-    public string FirstName { get; set; }
-
-    public string LastName { get; set; }
-
-    public string EmailAddress { get; set; }
-}
+public record CustomerDto(int Id, string UserName, string FirstName, string LastName, string EmailAddress);
 
 public record CreateCustomerDto(
-    [Required] [StringLength(50)] string UserName,
+    [StringLength(50)] string UserName,
     [Required] [StringLength(50)] string FirstName,
     [Required] [StringLength(150)] string LastName,
     [Required]
     [StringLength(250)]
     [EmailAddress]
     string EmailAddress
-);
+)
+{
+    public string GetUserName() => string.IsNullOrWhiteSpace(UserName) ? EmailAddress : UserName;
+}
 
 public record UpdateCustomerDto(
     [Required] [StringLength(50)] string FirstName,

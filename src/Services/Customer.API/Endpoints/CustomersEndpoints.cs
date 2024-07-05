@@ -15,22 +15,22 @@ public static class CustomersEndpoints
 
         group.MapGet("/username/{username}",
             async (string username, ICustomerService customerService) =>
-                await customerService.GetCustomerByUsernameAsync(username));
+                await customerService.GetByUsernameAsync(username));
         
         group.MapGet("/{id}",
             async (int id, ICustomerService customerService) =>
-                await customerService.GetCustomerAsync(id));
+                await customerService.GetAsync(id));
 
         group.MapPost("/",
             async ([FromBody]CreateCustomerDto customerDto, ICustomerService customerService) =>
-                await customerService.CreateCustomerAsync(customerDto));
+                await customerService.CreateAsync(customerDto));
         
         group.MapPut("/{id}",
             async (int id, [FromBody]UpdateCustomerDto customerDto, ICustomerService customerService) =>
-                await customerService.UpdateCustomerAsync(id, customerDto));
+                await customerService.UpdateAsync(id, customerDto));
 
         group.MapDelete("/{id}",
             async (int id, ICustomerService customerService) =>
-                await customerService.DeleteCustomerAsync(id));
+                await customerService.DeleteAsync(id));
     }
 }
