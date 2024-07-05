@@ -28,5 +28,9 @@ public static class CustomersEndpoints
         group.MapPut("/{id}",
             async (int id, [FromBody]UpdateCustomerDto customerDto, ICustomerService customerService) =>
                 await customerService.UpdateCustomerAsync(id, customerDto));
+
+        group.MapDelete("/{id}",
+            async (int id, ICustomerService customerService) =>
+                await customerService.DeleteCustomerAsync(id));
     }
 }

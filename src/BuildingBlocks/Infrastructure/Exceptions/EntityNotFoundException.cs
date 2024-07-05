@@ -1,8 +1,8 @@
-namespace Ordering.Domain.Exceptions;
+namespace Infrastructure.Exceptions;
 
 public class EntityNotFoundException : ApplicationException
 {
-    public EntityNotFoundException(string entity, object key) :
+    protected EntityNotFoundException(string entity, object key) :
         base($"Entity \"{entity}\" ({key}) was not found.")
     {
     }

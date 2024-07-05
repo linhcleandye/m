@@ -1,51 +1,54 @@
 using AutoMapper;
+using Customer.API.Exceptions;
 using Customer.API.Repositories.Interfaces;
 using Customer.API.Services.Interfaces;
+using Infrastructure.Exceptions;
 using Shared.DTOs.Customer;
 
 namespace Customer.API.Services;
 
-public class CustomerService : ICustomerService
+public class CustomerService(ICustomerRepository repository, IMapper mapper) : ICustomerService
 {
-    private readonly IMapper _mapper;
-    private readonly ICustomerRepository _repository;
-
-    public CustomerService(ICustomerRepository repository, IMapper mapper)
-    {
-        _repository = repository;
-        _mapper = mapper;
-    }
-
     public async Task<IResult> GetCustomerByUsernameAsync(string username)
     {
-        var entity = await _repository.GetCustomerByUserNameAsync(username);
-        var result = _mapper.Map<CustomerDto>(entity);
+        var entity = await repository.GetCustomerByUserNameAsync(username);
+        var result = mapper.Map<CustomerDto>(entity);
         return result == null ? Results.NotFound() : Results.Ok(result);
     }
 
     public async Task<IResult> GetCustomerAsync(int id)
     {
-        var entity = await _repository.GetByIdAsync(id);
-        var result = _mapper.Map<CustomerDto>(entity);
-        return result == null ? Results.NotFound("Customer not found") : Results.Ok(result);
+        var entity = await repository.GetByIdAsync(id);
+        var result = mapper.Map<CustomerDto>(entity);
+        return result == null ? throw new NotFoundException(id) : Results.Ok(result);
     }
 
     public async Task<IResult> CreateCustomerAsync(CreateCustomerDto customerDto)
     {
-        var entity = _mapper.Map<Entities.Customer>(customerDto);
-        await _repository.CreateAsync(entity);
-        var result = _mapper.Map<CustomerDto>(entity);
+        var entity = mapper.Map<Entities.Customer>(customerDto);
+        await repository.CreateAsync(entity);
+        var result = mapper.Map<CustomerDto>(entity);
         return Results.Ok(result);
     }
 
     public async Task<IResult> UpdateCustomerAsync(int id, UpdateCustomerDto customerDto)
     {
-        var existingCustomer = await _repository.GetByIdAsync(id);
+        var existingCustomer = await repository.GetByIdAsync(id);
         if (existingCustomer is null)
-            return Results.NotFound("Customer not found");
+            throw new NotFoundException(id);
         
-        var entity = _mapper.Map(customerDto, existingCustomer);
-        await _repository.UpdateAsync(entity);
+        var entity = mapper.Map(customerDto, existingCustomer);
+        await repository.UpdateAsync(entity);
+        return Results.NoContent();
+    }
+
+    public async Task<IResult> DeleteCustomerAsync(int id)
+    {
+        var existingCustomer = await repository.GetByIdAsync(id);
+        if (existingCustomer is null)
+            throw new NotFoundException(id);
+
+        await repository.DeleteAsync(existingCustomer);
         return Results.NoContent();
     }
 }
