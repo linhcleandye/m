@@ -53,6 +53,7 @@ public static class ServiceExtensions
             .AddScoped(typeof(IRepositoryBase<,,>), typeof(RepositoryBase<,,>))
             .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
             .AddScoped<ICustomerRepository, CustomerRepository>()
+            .AddScoped<IStripeCustomerRepository, StripeCustomerRepository>()
             .AddScoped<ICustomerService, CustomerService>()
             .AddScoped<ICustomerStripeService, CustomerStripeService>()
             .AddScoped<Stripe.CustomerService>()

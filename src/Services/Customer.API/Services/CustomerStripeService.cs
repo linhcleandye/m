@@ -28,12 +28,6 @@ public class CustomerStripeService : Stripe.CustomerService, ICustomerStripeServ
         return Results.Ok(result);
     }
 
-    public async Task<Stripe.Customer> GetCustomerByIdAsync(string id)
-    {
-        var stripeCustomer = await _stripeCustomerService.GetAsync(id);
-        return stripeCustomer;
-    }
-
     public async Task<IResult> SyncByIdAsync(string id, int customerId)
     {
         var stripeCustomer = await _stripeCustomerService.GetAsync(id);

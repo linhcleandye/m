@@ -19,7 +19,6 @@ public class Customer : EntityBase<int>
     [Required] [EmailAddress] public string EmailAddress { get; set; }
     
     public string? StripeCustomerId { get; set; }
-    
-    [NotMapped]
-    public Stripe.Customer? StripeCustomer { get; set; }
+
+    [NotMapped] public Stripe.Customer StripeCustomer { get; set; } = new();
 }

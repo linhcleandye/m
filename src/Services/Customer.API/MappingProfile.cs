@@ -2,6 +2,7 @@ using AutoMapper;
 using Infrastructure.Extensions;
 using Shared.DTOs.Customer;
 using Shared.DTOs.Customer.Stripe;
+using Stripe;
 
 namespace Customer.API;
 
@@ -11,7 +12,9 @@ public class MappingProfile : Profile
     {
         CreateMap<Entities.Customer, CustomerDto>();
         CreateMap<CreateCustomerDto, Entities.Customer>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.GetUserName()));
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.GetUserName()))
+            ;
+        
         CreateMap<UpdateCustomerDto, Entities.Customer>()
             .IgnoreAllNonExisting();
 
@@ -21,7 +24,12 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Shipping, opt => opt.MapFrom(src => src.Shipping.Address))
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
             ;
-        CreateMap<Stripe.Address, StripeCustomerAddressDto>();
-        CreateMap<Stripe.Shipping, StripeCustomerAddressDto>();
+        CreateMap<Address, StripeCustomerAddressDto>();
+        CreateMap<Shipping, StripeCustomerAddressDto>();
+          
+        CreateMap<StripeCustomerAddressDto, Address>();
+        CreateMap<StripeCustomerAddressDto, Shipping>();
+        CreateMap<StripeCustomerAddressDto, AddressOptions>();
+        CreateMap<StripeCustomerAddressDto, ShippingOptions>();
     }
 }

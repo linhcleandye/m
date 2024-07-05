@@ -114,6 +114,21 @@
       ],
       "SwaggerKey": "customer-service"
     },
+    {
+      "UpstreamPathTemplate": "/stripe/customers/sync-customers/{id}/customers/{customerId}",
+      "UpstreamHttpMethod": [
+        "PATCH"
+      ],
+      "DownstreamPathTemplate": "/api/stripe/customers/sync-customers/{id}/customers/{customerId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "SwaggerKey": "customer-service"
+    },
     // Product api: http://localhost:5002/api/products
     {
       "UpstreamPathTemplate": "/products/{id}",
