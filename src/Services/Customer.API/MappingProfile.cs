@@ -14,12 +14,12 @@ public class MappingProfile : Profile
         CreateMap<CreateCustomerDto, Entities.Customer>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.GetUserName()))
             .ForPath(dest => dest.StripeCustomer.Address, opt => opt.MapFrom(src => src.Address))
-            .ForPath(dest => dest.StripeCustomer.Shipping, opt => opt.MapFrom(src => src.Shipping))
+            .ForPath(dest => dest.StripeCustomer.Shipping.Address, opt => opt.MapFrom(src => src.Shipping))
             ;
         
         CreateMap<UpdateCustomerDto, Entities.Customer>()
             .ForPath(dest => dest.StripeCustomer.Address, opt => opt.MapFrom(src => src.Address))
-            .ForPath(dest => dest.StripeCustomer.Shipping, opt => opt.MapFrom(src => src.Shipping))
+            .ForPath(dest => dest.StripeCustomer.Shipping.Address, opt => opt.MapFrom(src => src.Shipping))
             .IgnoreAllNonExisting();
 
         // Stripe Customer
@@ -30,6 +30,7 @@ public class MappingProfile : Profile
             ;
         CreateMap<Address, StripeCustomerAddressDto>();
         CreateMap<Shipping, StripeCustomerAddressDto>();
+        CreateMap<UpdateCustomerDto, Stripe.Customer>();
           
         CreateMap<StripeCustomerAddressDto, Address>();
         CreateMap<StripeCustomerAddressDto, Shipping>();
