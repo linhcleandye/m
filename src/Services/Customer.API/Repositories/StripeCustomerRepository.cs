@@ -7,6 +7,9 @@ public class StripeCustomerRepository(CustomerService stripeCustomerService) : I
 {
     public Task<Stripe.Customer> GetByIdAsync(string id) => stripeCustomerService.GetAsync(id);
 
-    public Task<Stripe.Customer> CreateAsync(CustomerCreateOptions options) =>
-        stripeCustomerService.CreateAsync(options);
+    public Task<Stripe.Customer> CreateAsync(CustomerCreateOptions options)
+        => stripeCustomerService.CreateAsync(options);
+
+    public Task<Stripe.Customer> UpdateAsync(string id, CustomerUpdateOptions options)
+        => stripeCustomerService.UpdateAsync(id, options);
 }

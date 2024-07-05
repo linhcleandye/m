@@ -81,7 +81,7 @@ public class CustomerService(
         ShippingOptions shippingOptions = new ShippingOptions();
         if (customerDto.StripeCustomer is not null)
         {
-            shippingOptions = mapper.Map<ShippingOptions>(customerDto.StripeCustomer.Shipping);
+            shippingOptions.Address = mapper.Map<AddressOptions>(customerDto.StripeCustomer.Shipping);
         }
         
         var stripeCustomer = new CustomerCreateOptions
@@ -102,8 +102,26 @@ public class CustomerService(
         if (existingCustomer is null)
             throw new NotFoundException(id);
 
+        if (customerDto.StripeCustomerId is not null)
+        {
+            existingCustomer.StripeCustomer = await customerStripeRepository.GetByIdAsync(customerDto.StripeCustomerId);
+            ShippingOptions shippingOptions = new()
+            {
+                Address = mapper.Map<AddressOptions>(customerDto.Shipping),
+                Name = customerDto.FirstName,
+                Phone = existingCustomer.StripeCustomer.Phone,
+            };
+            var updateOptions = new CustomerUpdateOptions()
+            {
+                Address = mapper.Map<AddressOptions>(customerDto.Address),
+                Shipping = shippingOptions
+            };
+            await customerStripeRepository.UpdateAsync(customerDto.StripeCustomerId, updateOptions);
+        }
+
         var entity = mapper.Map(customerDto, existingCustomer);
         await repository.UpdateAsync(entity);
+       
         return Results.NoContent();
     }
 
