@@ -6,6 +6,7 @@ namespace Saga.Orchestrator.HttpRepository;
 public class BasketHttpRepository : IBasketHttpRepository
 {
     private readonly HttpClient _client;
+    private const string BaseUrl = "baskets";
 
     public BasketHttpRepository(HttpClient client)
     {
@@ -14,7 +15,7 @@ public class BasketHttpRepository : IBasketHttpRepository
 
     public async Task<CartDto> GetBasket(string username)
     {
-        var cart = await _client.GetFromJsonAsync<CartDto>($"baskets/{username}");
+        var cart = await _client.GetFromJsonAsync<CartDto>($"${BaseUrl}/{username}");
         if (cart == null || !cart.Items.Any()) return null;
 
         return cart;
@@ -22,7 +23,7 @@ public class BasketHttpRepository : IBasketHttpRepository
 
     public async Task<bool> DeleteBasket(string username)
     {
-        var response = await _client.DeleteAsync($"baskets/{username}");
+        var response = await _client.DeleteAsync($"{BaseUrl}/{username}");
         if (!response.EnsureSuccessStatusCode().IsSuccessStatusCode)
             throw new Exception($"Delete basket for Username: {username} not success");
 

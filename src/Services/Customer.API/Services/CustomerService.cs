@@ -13,9 +13,12 @@ public class CustomerService(
     IMapper mapper,
     IStripeCustomerRepository customerStripeRepository) : ICustomerService
 {
-    public async Task<IResult> GetByUsernameAsync(string username)
+    public async Task<IResult> GetByUsernameOrEmailAsync(string username)
     {
-        var entity = await repository.GetCustomerByUserNameAsync(username);
+        var entity = await repository.GetCustomerByUserNameOrEmailAsync(username);
+        if (entity is not null && !string.IsNullOrEmpty(entity.StripeCustomerId))
+            entity.StripeCustomer = await customerStripeRepository.GetByIdAsync(entity.StripeCustomerId);
+
         var result = mapper.Map<CustomerDto>(entity);
         return result == null ? Results.NotFound() : Results.Ok(result);
     }
@@ -40,7 +43,10 @@ public class CustomerService(
 
     private async Task<CustomerDto?> GetCustomerByUsernameAsync(string username)
     {
-        var entity = await repository.GetCustomerByUserNameAsync(username);
+        var entity = await repository.GetCustomerByUserNameOrEmailAsync(username);
+        if (entity is not null && !string.IsNullOrEmpty(entity.StripeCustomerId))
+            entity.StripeCustomer = await customerStripeRepository.GetByIdAsync(entity.StripeCustomerId);
+
         return mapper.Map<CustomerDto>(entity);
     }
 
@@ -61,7 +67,7 @@ public class CustomerService(
         entity.StripeCustomer.Shipping.Address = mapper.Map<Address>(customerDto.Shipping);
         entity.StripeCustomer.Phone = entity.StripeCustomer.Shipping.Phone = customerDto.Phone;
         await repository.CreateAsync(entity); // save customer to database to get the id
-        
+
         entity.StripeCustomer = await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
         entity.StripeCustomerId = entity.StripeCustomer.Id;
         await repository.SaveChangesAsync();
@@ -75,7 +81,7 @@ public class CustomerService(
         var shippingOptions = GetShippingOptions(customerDto);
         var metadata = new Dictionary<string, string>
         {
-            {"customer_id", customerDto.Id.ToString()}
+            { "customer_id", customerDto.Id.ToString() }
         };
 
         var stripeCustomer = new CustomerCreateOptions
@@ -112,18 +118,19 @@ public class CustomerService(
             var stripeCustomer = await UpdateStripeCustomerAsync(customerDto, existingCustomer);
             entity.StripeCustomer = stripeCustomer;
         }
-        
+
         await repository.UpdateAsync(entity);
         var result = mapper.Map<CustomerDto>(entity);
         return Results.AcceptedAtRoute(ApiEndpoints.Customers.GetCustomerById, new { id = entity.Id }, result);
     }
 
-    private async Task<Stripe.Customer> UpdateStripeCustomerAsync(UpdateCustomerDto customerDto, Entities.Customer existingCustomer)
+    private async Task<Stripe.Customer> UpdateStripeCustomerAsync(UpdateCustomerDto customerDto,
+        Entities.Customer existingCustomer)
     {
         existingCustomer.StripeCustomer = await customerStripeRepository.GetByIdAsync(customerDto.StripeCustomerId);
         var metadata = new Dictionary<string, string>
         {
-            {"customer_id", existingCustomer.Id.ToString()}
+            { "customer_id", existingCustomer.Id.ToString() }
         };
         var shippingOptions = new ShippingOptions
         {
@@ -152,7 +159,7 @@ public class CustomerService(
 
         if (!string.IsNullOrEmpty(existingCustomer.StripeCustomerId))
             await customerStripeRepository.DeleteAsync(existingCustomer.StripeCustomerId, null);
-        
+
         await repository.DeleteAsync(existingCustomer);
         return Results.NoContent();
     }

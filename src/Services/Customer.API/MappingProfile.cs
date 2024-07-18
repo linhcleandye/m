@@ -10,7 +10,9 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<Entities.Customer, CustomerDto>();
+        CreateMap<Entities.Customer, CustomerDto>()
+            .ForPath(dest => dest.StripeCustomer, opt => opt.MapFrom(src => src.StripeCustomer))
+            ;
         CreateMap<CreateCustomerDto, Entities.Customer>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.GetUserName()))
             .ForPath(dest => dest.StripeCustomer.Address, opt => opt.MapFrom(src => src.Address))

@@ -16,8 +16,8 @@ internal static class CustomersEndpoints
 
         group.MapGet("/username/{username}",
                 async (string username, ICustomerService customerService) =>
-                    await customerService.GetByUsernameAsync(username));
-
+                    await customerService.GetByUsernameOrEmailAsync(username));
+        
         group.MapGet("/{id}",
                 async (int id, ICustomerService customerService) =>
                     await customerService.GetAsync(id))

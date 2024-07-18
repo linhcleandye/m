@@ -1,9 +1,12 @@
+using Common.Logging;
 using Contracts.Services;
 using HealthChecks.UI.Client;
 using Infrastructure.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Payment.API.Endpoints;
 using Payment.API.Extensions;
+using Payment.API.HttpRepositories;
+using Payment.API.HttpRepositories.Interfaces;
 using Payment.API.Services;
 using Serilog;
 
@@ -16,7 +19,10 @@ try
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Host.AddAppConfigurations();
     builder.Services.AddConfigurationSettings(builder.Configuration);
+    builder.Services.AddTransient<LoggingDelegatingHandler>();
+    builder.Services.ConfigureCustomerHttpClient();
     builder.Services.AddScoped<IPaymentService, StripeClientService>();
+    builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddControllers();

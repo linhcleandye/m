@@ -12,9 +12,9 @@ public class CustomerRepository : RepositoryBase<Entities.Customer, int, Custome
     {
     }
 
-    public Task<Entities.Customer?> GetCustomerByUserNameAsync(string username)
+    public Task<Entities.Customer?> GetCustomerByUserNameOrEmailAsync(string username)
     {
-        return FindByCondition(x => x.UserName.Equals(username))
+        return FindByCondition(x => x.UserName.Equals(username) || x.EmailAddress.Equals(username))
             .SingleOrDefaultAsync();
     }
 
