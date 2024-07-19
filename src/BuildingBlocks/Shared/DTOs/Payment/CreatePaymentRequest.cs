@@ -15,8 +15,6 @@ public record CheckoutProductRequest
 
 public record PaymentCustomerRequest
 {
-    public string? CustomerId { get; set; } // Stripe Customer ID
-
     private string? userName;
     public string? UserName
     {
@@ -27,7 +25,7 @@ public record PaymentCustomerRequest
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public required string Email { get; set; }
-    public string Phone { get; set; }
+    public required string Phone { get; set; }
     public StripeCustomerAddressDto? Address { get; set; }
     public StripeCustomerAddressDto? Shipping { get; set; }
     
@@ -36,7 +34,7 @@ public record PaymentCustomerRequest
 
 public record CreatePaymentRequest
 {
-    public PaymentCustomerRequest? Customer { get; set; }
+    public required PaymentCustomerRequest Customer { get; set; }
     public List<CheckoutProductRequest> Products { get; set; } = new();
     public Dictionary<string, string>? Metadata { get; set; }
     public string SuccessRedirectUrl { get; set; }

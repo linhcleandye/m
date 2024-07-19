@@ -14,12 +14,7 @@ public static class PaymentEndpoints
         {
             // TODO: create a 'Payment' record in the database to store a summary of this payment.
             // TODO: set it's status to 'Pending' or 'Processing'.
-            if (request.Customer is not null)
-            {
-                var customerResponse = await paymentService.CreateCustomer(request.Customer);
-                request.Customer.CustomerId = customerResponse.Id;
-            }
-
+            
             var response = await paymentService.Checkout(request);
 
             return Results.Ok(response);

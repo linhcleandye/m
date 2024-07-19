@@ -55,7 +55,7 @@ public static class ServiceExtensions
             .AddScoped<ICustomerRepository, CustomerRepository>()
             .AddScoped<IStripeCustomerRepository, StripeCustomerRepository>()
             .AddScoped<ICustomerService, CustomerService>()
-            .AddScoped<ICustomerStripeService, CustomerStripeService>()
+            .AddScoped<IStripeCustomerService, StripeCustomerService>()
             .AddScoped<Stripe.CustomerService>()
             ;
     }

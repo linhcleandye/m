@@ -1,6 +1,4 @@
-using System.Net;
 using Contracts.Services;
-using Payment.API.Exceptions;
 using Payment.API.HttpRepositories.Interfaces;
 using Shared.DTOs.Customer;
 using Shared.DTOs.Payment;
@@ -14,6 +12,8 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
 {
     public async Task<CreatePaymentResponse> Checkout(CreatePaymentRequest request)
     {
+        var stripeCustomer = await GetOrCreateCustomer(request.Customer);
+        
         var options = new SessionCreateOptions
         {
             Mode = "payment", // "setup" or "subscription"
@@ -48,12 +48,14 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
 
         var checkoutSession = await new SessionService().CreateAsync(options);
         logger.Information("Stripe Checkout Session created: {CheckoutSessionId}", checkoutSession.Id);
-        return new CreatePaymentResponse(checkoutSession.Url, checkoutSession.Id, request.Customer?.CustomerId);
+        return new CreatePaymentResponse(checkoutSession.Url, checkoutSession.Id, stripeCustomer.Id);
     }
 
-    public async Task<PaymentCustomerResponse> CreateCustomer(PaymentCustomerRequest request)
+    private async Task<PaymentCustomerResponse> GetOrCreateCustomer(PaymentCustomerRequest request)
     {
-        request = await GetOrCreateCustomer(request);
+        var existingCustomer = await customerRepository.GetByEmailAsync(request.Email);
+        if (existingCustomer?.StripeCustomer != null && !string.IsNullOrEmpty(existingCustomer.StripeCustomer.Id))
+            return new PaymentCustomerResponse(existingCustomer.StripeCustomer.Id);
         
         var options = new CustomerCreateOptions
         {
@@ -63,9 +65,8 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
             {
                 City = request.Address?.City,
                 Country = request.Address?.Country,
-                Line1 = request.Address?.Line1,
-                Line2 = request.Address?.Line2,
-                PostalCode = request.Address?.PostalCode,
+                Line1 = request.Address?.Street,
+                PostalCode = request.Address?.Zip,
                 State = request.Address?.State
             },
             Shipping = new ShippingOptions
@@ -75,9 +76,8 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
                 {
                     City = request.Shipping?.City,
                     Country = request.Shipping?.Country,
-                    Line1 = request.Shipping?.Line1,
-                    Line2 = request.Shipping?.Line2,
-                    PostalCode = request.Shipping?.PostalCode,
+                    Line1 = request.Shipping?.Street,
+                    PostalCode = request.Shipping?.Zip,
                     State = request.Shipping?.State
                 },
                 Phone = request.Phone
@@ -87,40 +87,19 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
 
         var service = new CustomerService();
         var customer = await service.CreateAsync(options);
+        
+        // Save the customer to the database of the Customer service
+        var customerDto = new CreateCustomerDto(
+            request.Email,
+            request.FirstName,
+            request.LastName,
+            request.Phone,
+            request.Address,
+            request.Shipping,
+            customer.Id
+        );
+        await customerRepository.CreateAsync(customerDto);
+        
         return new PaymentCustomerResponse(customer.Id);
-    }
-
-    private async Task<PaymentCustomerRequest> GetOrCreateCustomer(PaymentCustomerRequest request)
-    {
-        try
-        {
-            var existingCustomer = await customerRepository.GetByUserNameOrEmailAsync(request.Email);
-            if (existingCustomer != null)
-            {
-                if (!string.IsNullOrEmpty(request.CustomerId) && existingCustomer.StripeCustomer.Id != request.CustomerId)
-                    throw new CustomerIdNotValidException(existingCustomer.StripeCustomer.Id);
-                
-                request.CustomerId = existingCustomer.StripeCustomer.Id;
-            }
-        }
-        catch (HttpRequestException e)
-        {
-            switch (e.StatusCode)
-            {
-                case HttpStatusCode.NotFound:
-                    var createCustomerDto = new CreateCustomerDto(request.UserName, request.FirstName, request.LastName,
-                        request.Email, request.Phone, request.Address, request.Shipping);
-                    var customerCreated = await customerRepository.CreateAsync(createCustomerDto);
-                    request.CustomerId = customerCreated.StripeCustomer.Id;
-                    break;
-            }
-        }
-        catch (Exception e)
-        {
-            logger.Error(e, "Error occurred while creating customer");
-            throw new Exception("Error occurred while creating customer");
-        }
-
-        return request;
     }
 }

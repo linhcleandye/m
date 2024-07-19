@@ -6,23 +6,25 @@ namespace Shared.DTOs.Customer;
 public record CustomerDto(int Id, string UserName, string FirstName, string LastName, string EmailAddress, StripeCustomerDto StripeCustomer)
 {
     public string FullName() => $"{FirstName} {LastName}";
+    public string? StripeCustomerId { get; set; }
 }
 
 public record CreateCustomerDto(
-    [StringLength(50)] string? UserName,
+    [Required]
+    [EmailAddress]
+    string EmailAddress,
     [Required] [StringLength(50)] string FirstName,
     [Required] [StringLength(150)] string LastName,
     [Required]
     [StringLength(250)]
-    [EmailAddress]
-    string EmailAddress,
     string? Phone,
     StripeCustomerAddressDto? Address,
-    StripeCustomerAddressDto? Shipping
+    StripeCustomerAddressDto? Shipping,
+    string? StripeCustomerId
 )
 {
-    public string GetUserName() => string.IsNullOrWhiteSpace(UserName) ? EmailAddress : UserName;
     public string FullName() => $"{FirstName} {LastName}";
+    public string UserName => EmailAddress;
 }
 
 public record UpdateCustomerDto(
@@ -34,5 +36,5 @@ public record UpdateCustomerDto(
     StripeCustomerAddressDto? Shipping
 )
 {
-    public string FullName() => $"{FirstName} {LastName}";
+    public string FullName => $"{FirstName} {LastName}";
 }

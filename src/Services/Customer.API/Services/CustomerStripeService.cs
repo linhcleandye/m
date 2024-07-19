@@ -6,39 +6,32 @@ using Shared.DTOs.Customer.Stripe;
 
 namespace Customer.API.Services;
 
-public class CustomerStripeService : Stripe.CustomerService, ICustomerStripeService
+public class StripeCustomerService(
+    IMapper mapper,
+    Stripe.CustomerService stripeCustomerService,
+    ICustomerRepository repository)
+    : Stripe.CustomerService, IStripeCustomerService
 {
-    private readonly Stripe.CustomerService _stripeCustomerService;
-    private readonly ICustomerRepository _repository;
-    private readonly IMapper _mapper;
+    public async Task<IResult> GetByIdAsync(string id) => Results.Ok(await GetCustomerByIdAsync(id));
 
-    public CustomerStripeService(IMapper mapper, Stripe.CustomerService stripeCustomerService,
-        ICustomerRepository repository)
+    public async Task<StripeCustomerDto> GetCustomerByIdAsync(string id)
     {
-        _mapper = mapper;
-        _stripeCustomerService = stripeCustomerService;
-        _repository = repository;
-    }
-    
-    public async Task<IResult> GetByIdAsync(string id)
-    {
-        var stripeCustomer = await _stripeCustomerService.GetAsync(id);
-        var result = _mapper.Map<StripeCustomerDto>(stripeCustomer);
-
-        return Results.Ok(result);
+        var stripeCustomer = await stripeCustomerService.GetAsync(id);
+        var result = mapper.Map<StripeCustomerDto>(stripeCustomer);
+        return result;
     }
 
     public async Task<IResult> SyncByIdAsync(string id, int customerId)
     {
-        var stripeCustomer = await _stripeCustomerService.GetAsync(id);
-        var customer = await _repository.GetByIdAsync(customerId);
+        var stripeCustomer = await stripeCustomerService.GetAsync(id);
+        var customer = await repository.GetByIdAsync(customerId);
         if (customer is null)
             throw new NotFoundException(customerId);
 
         customer.StripeCustomer = stripeCustomer;
         customer.StripeCustomerId = stripeCustomer.Id;
         
-        await _repository.UpdateAsync(customer);
+        await repository.UpdateAsync(customer);
         return Results.NoContent();
     }
 }

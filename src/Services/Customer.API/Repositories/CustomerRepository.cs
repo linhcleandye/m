@@ -18,7 +18,7 @@ public class CustomerRepository : RepositoryBase<Entities.Customer, int, Custome
             .SingleOrDefaultAsync();
     }
 
-    public Task<Entities.Customer?> GetCustomerByEmailAsync(string email)
+    public Task<Entities.Customer?> GetByEmailAsync(string email)
     {
         return FindByCondition(x => x.EmailAddress.Equals(email))
             .SingleOrDefaultAsync();

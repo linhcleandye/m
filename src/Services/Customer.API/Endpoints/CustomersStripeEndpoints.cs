@@ -14,13 +14,13 @@ public static class CustomersStripeEndpoints
 
         group.MapGet("/{id}",
             async (string id,
-                    ICustomerStripeService customerService) =>
+                    IStripeCustomerService customerService) =>
                 await customerService.GetByIdAsync(id))
             .WithName("GetStripeCustomerById");
         
         group.MapPatch("/sync-customers/{id}/customers/{customerId:int}",
             async ([Required]string id, [Required]int customerId,
-                    ICustomerStripeService customerService) =>
+                    IStripeCustomerService customerService) =>
                 await customerService.SyncByIdAsync(id, customerId));
         
     }
