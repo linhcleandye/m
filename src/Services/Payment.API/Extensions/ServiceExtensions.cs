@@ -36,6 +36,7 @@ public static class ServiceExtensions
         services.AddHttpClient<ICustomerRepository, CustomerRepository>("CustomersAPI",
                 (sp, cl) => { cl.BaseAddress = new Uri($"{urls.Customer}/api/"); })
             .AddHttpMessageHandler<LoggingDelegatingHandler>()
+            .UseLinearHttpRetryPolicy()
             ;
         services.AddScoped(sp => sp.GetService<IHttpClientFactory>()
             .CreateClient("CustomersAPI"));

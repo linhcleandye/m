@@ -53,9 +53,9 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
 
     private async Task<PaymentCustomerResponse> GetOrCreateCustomer(PaymentCustomerRequest request)
     {
-        var existingCustomer = await customerRepository.GetByEmailAsync(request.Email);
-        if (existingCustomer?.StripeCustomer != null && !string.IsNullOrEmpty(existingCustomer.StripeCustomer.Id))
-            return new PaymentCustomerResponse(existingCustomer.StripeCustomer.Id);
+        var paymentCustomerResponse = await TryGetCustomerByEmail(request.Email);
+        if (!string.IsNullOrEmpty(paymentCustomerResponse.Id))
+            return new PaymentCustomerResponse(paymentCustomerResponse.Id);
         
         var options = new CustomerCreateOptions
         {
@@ -88,18 +88,50 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
         var service = new CustomerService();
         var customer = await service.CreateAsync(options);
         
-        // Save the customer to the database of the Customer service
-        var customerDto = new CreateCustomerDto(
-            request.Email,
-            request.FirstName,
-            request.LastName,
-            request.Phone,
-            request.Address,
-            request.Shipping,
-            customer.Id
-        );
-        await customerRepository.CreateAsync(customerDto);
+        if (paymentCustomerResponse.IsSuccess)
+            await TryCreateCustomerAsync(request, customer.Id);
         
         return new PaymentCustomerResponse(customer.Id);
+    }
+    
+    // Get the customer from the database of the Customer service
+    private async Task<GetCustomerResponse> TryGetCustomerByEmail(string email)
+    {
+        try
+        {
+            var existingCustomer = await customerRepository.GetByEmailAsync(email);
+            if (existingCustomer?.StripeCustomer.Id is not null)
+                return new GetCustomerResponse(existingCustomer.StripeCustomer.Id);
+        }
+        catch (Exception e)
+        {
+            logger.Error(e.Message);
+            return new GetCustomerResponseFailed(e.Message);
+        }
+        return new GetCustomerResponseFailed("Customer not found | Customer service error");
+    }
+    
+    // Save the customer to the database of the Customer service
+    private async Task<GetCustomerResponse> TryCreateCustomerAsync(PaymentCustomerRequest request, string stripeCustomerId)
+    {
+        try
+        {
+            var customerDto = new CreateCustomerDto(
+                request.Email,
+                request.FirstName,
+                request.LastName,
+                request.Phone,
+                request.Address,
+                request.Shipping,
+                stripeCustomerId
+            );
+            var result = await customerRepository.CreateAsync(customerDto);
+            return new GetCustomerResponse(result?.StripeCustomerId);
+        }
+        catch (Exception e)
+        {
+            logger.Error(e.Message);
+        }
+        return new GetCustomerResponseFailed("Customer not found | Customer service error");
     }
 }
