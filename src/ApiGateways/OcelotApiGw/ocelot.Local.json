@@ -416,11 +416,26 @@
     },
     // Payment API : http://localhost:6011
     {
-      "UpstreamPathTemplate": "/payments/create-checkout-session",
+      "UpstreamPathTemplate": "/payments/checkout-sessions",
       "UpstreamHttpMethod": [
         "POST"
       ],
-      "DownstreamPathTemplate": "/api/payments/create-checkout-session",
+      "DownstreamPathTemplate": "/api/payments/checkout-sessions",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 6011
+        }
+      ],
+      "SwaggerKey": "payment-service"
+    },
+    {
+      "UpstreamPathTemplate": "/payments/checkout-sessions/{sessionId}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/payments/checkout-sessions/{sessionId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {

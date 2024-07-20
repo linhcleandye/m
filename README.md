@@ -158,3 +158,7 @@ docker-compose down
       Persistence/Migrations
     - dotnet ef migrations remove -p Ordering.Infrastructure --startup-project Ordering.API
     - dotnet ef database update -p Ordering.Infrastructure --startup-project Ordering.API
+- Build & Push Docker Image:
+  - cd into src folder: `cd src`
+  - docker build -t {your-docker-id}/{image-name}:{tag} -f {Dockerfile-path} .
+  - docker push {your-docker-id}/{image-name}:{tag}
