@@ -4,5 +4,6 @@ namespace Contracts.Services;
 
 public interface IPaymentService
 {
-    Task<CreatePaymentResponse> Checkout(CreatePaymentRequest request);
+    Task<CreatePaymentResponse> CheckoutAsync(CreatePaymentRequest request);
+    Task<PaymentResponse> GetCheckoutSessionStatusAsync(string sessionId);
 }

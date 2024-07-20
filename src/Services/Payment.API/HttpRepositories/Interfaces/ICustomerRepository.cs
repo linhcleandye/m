@@ -5,5 +5,5 @@ namespace Payment.API.HttpRepositories.Interfaces;
 public interface ICustomerRepository
 {
     Task<CustomerDto?> GetByEmailAsync(string email);
-    Task<CustomerDto?> CreateAsync(CreateCustomerDto customerDto);
+    Task<CustomerDto?> CreateOrUpdateAsync(CreateCustomerDto customerDto);
 }

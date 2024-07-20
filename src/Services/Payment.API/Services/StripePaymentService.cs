@@ -8,9 +8,9 @@ using ILogger = Serilog.ILogger;
 
 namespace Payment.API.Services;
 
-public class StripeClientService(ILogger logger, ICustomerRepository customerRepository) : IPaymentService
+public class StripePaymentService(ILogger logger, ICustomerRepository customerRepository) : IPaymentService
 {
-    public async Task<CreatePaymentResponse> Checkout(CreatePaymentRequest request)
+    public async Task<CreatePaymentResponse> CheckoutAsync(CreatePaymentRequest request)
     {
         var stripeCustomer = await GetOrCreateCustomer(request.Customer);
         
@@ -51,6 +51,13 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
         return new CreatePaymentResponse(checkoutSession.Url, checkoutSession.Id, stripeCustomer.Id);
     }
 
+    public async Task<PaymentResponse> GetCheckoutSessionStatusAsync(string sessionId)
+    {
+        var options = new SessionGetOptions();
+        var session = await new SessionService().GetAsync(sessionId, options);
+        return new PaymentResponse(session.Status, session.PaymentStatus, session.AmountTotal, session.CustomerEmail);
+    }
+
     private async Task<PaymentCustomerResponse> GetOrCreateCustomer(PaymentCustomerRequest request)
     {
         var paymentCustomerResponse = await TryGetCustomerByEmail(request.Email);
@@ -88,8 +95,7 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
         var service = new CustomerService();
         var customer = await service.CreateAsync(options);
         
-        if (paymentCustomerResponse.IsSuccess)
-            await TryCreateCustomerAsync(request, customer.Id);
+        await TryCreateOrUpdateCustomerAsync(request, customer.Id);
         
         return new PaymentCustomerResponse(customer.Id);
     }
@@ -100,19 +106,22 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
         try
         {
             var existingCustomer = await customerRepository.GetByEmailAsync(email);
-            if (existingCustomer?.StripeCustomer.Id is not null)
-                return new GetCustomerResponse(existingCustomer.StripeCustomer.Id);
+            if (existingCustomer?.StripeCustomer.Id is not null && existingCustomer.StripeCustomer.Deleted is false)
+            {
+                var stripeCustomer = await new CustomerService().GetAsync(existingCustomer.StripeCustomer.Id);
+                if (stripeCustomer is not null)
+                    return new GetCustomerResponse(existingCustomer.StripeCustomer.Id);
+            }
         }
         catch (Exception e)
         {
             logger.Error(e.Message);
-            return new GetCustomerResponseFailed(e.Message);
         }
         return new GetCustomerResponseFailed("Customer not found | Customer service error");
     }
     
     // Save the customer to the database of the Customer service
-    private async Task<GetCustomerResponse> TryCreateCustomerAsync(PaymentCustomerRequest request, string stripeCustomerId)
+    private async Task TryCreateOrUpdateCustomerAsync(PaymentCustomerRequest request, string stripeCustomerId)
     {
         try
         {
@@ -125,13 +134,11 @@ public class StripeClientService(ILogger logger, ICustomerRepository customerRep
                 request.Shipping,
                 stripeCustomerId
             );
-            var result = await customerRepository.CreateAsync(customerDto);
-            return new GetCustomerResponse(result?.StripeCustomerId);
+            await customerRepository.CreateOrUpdateAsync(customerDto);
         }
         catch (Exception e)
         {
             logger.Error(e.Message);
         }
-        return new GetCustomerResponseFailed("Customer not found | Customer service error");
     }
 }

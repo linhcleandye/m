@@ -1,4 +1,3 @@
-
 namespace Shared.DTOs.Customer.Stripe;
 
 public class StripeCustomerDto
@@ -11,7 +10,14 @@ public class StripeCustomerDto
     public Dictionary<string, string> Metadata { get; set; }
     public string Phone { get; set; }
     public StripeCustomerAddressDto Shipping { get; set; }
-    public bool? Deleted { get; set; }
+
+    private bool? deleted;
+
+    public bool Deleted
+    {
+        get => deleted ?? false;
+        set => deleted = value;
+    }
 }
 
 public class StripeCustomerAddressDto

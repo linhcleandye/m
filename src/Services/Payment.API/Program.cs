@@ -21,7 +21,7 @@ try
     builder.Services.AddConfigurationSettings(builder.Configuration);
     builder.Services.AddTransient<LoggingDelegatingHandler>();
     builder.Services.ConfigureCustomerHttpClient();
-    builder.Services.AddScoped<IPaymentService, StripeClientService>();
+    builder.Services.AddScoped<IPaymentService, StripePaymentService>();
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();

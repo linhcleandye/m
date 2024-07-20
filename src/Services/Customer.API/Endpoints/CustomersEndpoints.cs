@@ -25,7 +25,7 @@ internal static class CustomersEndpoints
 
         group.MapPost("/",
             async ([FromBody] CreateCustomerDto customerDto, ICustomerService customerService) =>
-            await customerService.CreateAsync(customerDto));
+            await customerService.CreateOrUpdateAsync(customerDto));
 
         group.MapPut("/{id}",
             async (int id, [FromBody] UpdateCustomerDto customerDto, ICustomerService customerService) =>

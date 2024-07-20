@@ -1,11 +1,12 @@
 using Customer.API.Repositories.Interfaces;
 using Stripe;
+using ILogger = Serilog.ILogger;
 
 namespace Customer.API.Repositories;
 
-public class StripeCustomerRepository(CustomerService stripeCustomerService) : IStripeCustomerRepository
+public class StripeCustomerRepository(ILogger logger, CustomerService stripeCustomerService) : IStripeCustomerRepository
 {
-    public Task<Stripe.Customer> GetByIdAsync(string id) => stripeCustomerService.GetAsync(id);
+    public Task<Stripe.Customer?> GetByIdAsync(string id) => stripeCustomerService.GetAsync(id);
 
     public Task<Stripe.Customer> CreateAsync(CustomerCreateOptions options)
         => stripeCustomerService.CreateAsync(options);

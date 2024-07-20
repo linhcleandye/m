@@ -390,11 +390,26 @@
     },
     // Payment API : http://localhost:5011
     {
-      "UpstreamPathTemplate": "/payments/create-checkout-session",
+      "UpstreamPathTemplate": "/payments/checkout-sessions",
       "UpstreamHttpMethod": [
         "POST"
       ],
-      "DownstreamPathTemplate": "/api/payments/create-checkout-session",
+      "DownstreamPathTemplate": "/api/payments/checkout-sessions",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5011
+        }
+      ],
+      "SwaggerKey": "payment-service"
+    },
+    {
+      "UpstreamPathTemplate": "/payments/checkout-sessions/{sessionId}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/payments/checkout-sessions/{sessionId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {

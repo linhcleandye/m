@@ -19,7 +19,7 @@ public class CustomerRepository(HttpClient client) : ICustomerRepository
     /// </summary>
     /// <param name="customerDto"></param>
     /// <returns></returns>
-    public async Task<CustomerDto?> CreateAsync(CreateCustomerDto customerDto)
+    public async Task<CustomerDto?> CreateOrUpdateAsync(CreateCustomerDto customerDto)
     {
         var response = await client.PostAsJsonAsync($"{Endpoint}", customerDto);
         return await response.EnsureSuccessStatusCode().ReadContentAs<CustomerDto>();

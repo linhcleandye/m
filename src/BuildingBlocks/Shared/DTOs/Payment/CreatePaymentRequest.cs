@@ -15,6 +15,7 @@ public record CheckoutProductRequest
 
 public record PaymentCustomerRequest
 {
+    public int? Id { get; set; }
     private string? userName;
     public string? UserName
     {
