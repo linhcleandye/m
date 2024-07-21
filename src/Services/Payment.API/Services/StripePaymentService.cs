@@ -95,6 +95,7 @@ public class StripePaymentService(ILogger logger, ICustomerRepository customerRe
         var service = new CustomerService();
         var customer = await service.CreateAsync(options);
         
+        // Save the customer to the database of the Customer service
         await TryCreateOrUpdateCustomerAsync(request, customer.Id);
         
         return new PaymentCustomerResponse(customer.Id);
@@ -106,7 +107,8 @@ public class StripePaymentService(ILogger logger, ICustomerRepository customerRe
         try
         {
             var existingCustomer = await customerRepository.GetByEmailAsync(email);
-            if (existingCustomer?.StripeCustomer.Id is not null && existingCustomer.StripeCustomer.Deleted is false)
+            
+            if (!string.IsNullOrEmpty(existingCustomer?.StripeCustomerId) && existingCustomer.StripeCustomer.Deleted is false)
             {
                 var stripeCustomer = await new CustomerService().GetAsync(existingCustomer.StripeCustomer.Id);
                 if (stripeCustomer is not null)

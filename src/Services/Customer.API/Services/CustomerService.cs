@@ -47,42 +47,38 @@ public class CustomerService(
         var entity = mapper.Map<Entities.Customer>(customerDto);
         entity.Id = customerByEmail?.Id ?? 0;
 
-        // customer with the same email address already exists
-        if (customerByEmail is not null)
-        {
-            // customer with the same email address has no stripe customer
-            if (customerByEmail.StripeCustomerId is null && string.IsNullOrEmpty(customerDto.StripeCustomerId))
-            {
-                entity.StripeCustomer = await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
-            }
-            if (customerByEmail.StripeCustomerId is not null && customerDto.StripeCustomerId != customerByEmail.StripeCustomerId)
-            {
-                var stripeCustomerId = customerDto.StripeCustomerId ?? customerByEmail.StripeCustomerId;
-                if (stripeCustomerId is not null)
-                {
-                    var stripeCustomer = await stripeCustomerRepository.GetByIdAsync(stripeCustomerId);
-                    if (stripeCustomer!.Deleted is not null && stripeCustomer.Deleted.Value)
-                        entity.StripeCustomer = await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
-                }
-            }
-        }
-        else
-        {
-            await repository.CreateAsync(entity); // save customer to database to get the id
-            if (!string.IsNullOrEmpty(customerDto.StripeCustomerId))
-                entity.StripeCustomer = await stripeCustomerRepository.GetByIdAsync(customerDto.StripeCustomerId);
-            else
-                entity.StripeCustomer = await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
-        }
+        if (customerByEmail is null)
+            await repository.CreateAsync(entity);
 
-        entity.StripeCustomerId = entity.StripeCustomer!.Id;
-        entity.StripeCustomer!.Shipping.Address = mapper.Map<Address>(customerDto.Shipping);
-        entity.StripeCustomer.Phone = entity.StripeCustomer.Shipping.Phone = customerDto.Phone;
-
-        await repository.UpdateAsync(entity);
+        await UpdateStripeCustomerAsync(customerDto, entity);
         await repository.SaveChangesAsync();
+        
         var result = mapper.Map<CustomerDto>(entity);
         return Results.CreatedAtRoute(ApiEndpoints.Customers.GetCustomerById, new { id = entity.Id }, result);
+    }
+
+    private async Task UpdateStripeCustomerAsync(CreateCustomerDto customerDto, Entities.Customer entity)
+    {
+        entity.StripeCustomer = await GetOrCreateStripeCustomerAsync(entity, customerDto.StripeCustomerId);
+        entity.StripeCustomerId = entity.StripeCustomer!.Id;
+        entity.StripeCustomer.Shipping = new Shipping
+        {
+            Address = mapper.Map<Address>(customerDto.Shipping)
+        };
+        entity.StripeCustomer.Phone = entity.StripeCustomer.Shipping.Phone = customerDto.Phone;
+    }
+
+    private async Task<Stripe.Customer> GetOrCreateStripeCustomerAsync(
+        Entities.Customer entity, string? stripeCustomerId)
+    {
+        if (string.IsNullOrEmpty(stripeCustomerId))
+            return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
+
+        var stripeCustomer = await stripeCustomerRepository.GetByIdAsync(stripeCustomerId);
+        if (stripeCustomer?.Deleted != true)
+            return stripeCustomer!;
+
+        return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
     }
 
     private async Task<Stripe.Customer> CreateStripeCustomerAsync(CustomerDto customerDto)

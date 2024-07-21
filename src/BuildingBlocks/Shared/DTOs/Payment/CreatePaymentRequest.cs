@@ -15,14 +15,7 @@ public record CheckoutProductRequest
 
 public record PaymentCustomerRequest
 {
-    public int? Id { get; set; }
     private string? userName;
-    public string? UserName
-    {
-        get => userName ?? Email;
-        set => userName = value;
-    }
-
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public required string Email { get; set; }

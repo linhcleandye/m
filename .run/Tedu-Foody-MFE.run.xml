@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Tedu-Foody-MFE" type="CompoundRunConfigurationType">
+    <toRun name="Customer.API" type="LaunchSettings" />
+    <toRun name="OcelotApiGw" type="LaunchSettings" />
+    <toRun name="Payment.API" type="LaunchSettings" />
+    <toRun name="Product.API" type="LaunchSettings" />
+    <method v="2" />
+  </configuration>
+</component>
