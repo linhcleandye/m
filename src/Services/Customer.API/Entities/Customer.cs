@@ -21,5 +21,5 @@ public class Customer : EntityBase<int>
     
     public string? StripeCustomerId { get; set; }
 
-    [NotMapped] public Stripe.Customer? StripeCustomer { get; set; }
+    [NotMapped] public Stripe.Customer? StripeCustomer { get; set; } = new();
 }

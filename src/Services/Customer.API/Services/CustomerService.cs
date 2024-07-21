@@ -1,3 +1,4 @@
+using System.Net;
 using AutoMapper;
 using Customer.API.Controllers;
 using Customer.API.Exceptions;
@@ -5,10 +6,12 @@ using Customer.API.Repositories.Interfaces;
 using Customer.API.Services.Interfaces;
 using Shared.DTOs.Customer;
 using Stripe;
+using ILogger = Serilog.ILogger;
 
 namespace Customer.API.Services;
 
 public class CustomerService(
+    ILogger logger,
     ICustomerRepository repository,
     IMapper mapper,
     IStripeCustomerRepository stripeCustomerRepository) : ICustomerService
@@ -61,7 +64,7 @@ public class CustomerService(
 
     private async Task UpdateStripeCustomerAsync(CreateCustomerDto customerDto, Entities.Customer entity)
     {
-        entity.StripeCustomer = await GetOrCreateStripeCustomerAsync(customerDto, customerDto.StripeCustomerId ?? entity.StripeCustomerId);
+        entity.StripeCustomer = await GetOrCreateStripeCustomerAsync(entity, customerDto, customerDto.StripeCustomerId ?? entity.StripeCustomerId);
         entity.StripeCustomerId = entity.StripeCustomer!.Id;
         entity.StripeCustomer.Shipping = new Shipping
         {
@@ -71,23 +74,40 @@ public class CustomerService(
         await repository.UpdateAsync(entity);
     }
 
-    private async Task<Stripe.Customer> GetOrCreateStripeCustomerAsync(
+    private async Task<Stripe.Customer> GetOrCreateStripeCustomerAsync(Entities.Customer entity,
         CreateCustomerDto customerDto, string? stripeCustomerId)
     {
         if (string.IsNullOrEmpty(stripeCustomerId))
-            return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(customerDto));
+            return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity), customerDto);
 
-        var stripeCustomer = await stripeCustomerRepository.GetByIdAsync(stripeCustomerId);
-        if (stripeCustomer?.Deleted != true)
-            return stripeCustomer!;
+        try
+        {
+            var stripeCustomer = await stripeCustomerRepository.GetByIdAsync(stripeCustomerId);
+            if (stripeCustomer?.Deleted != true)
+                return stripeCustomer!;
+        }
+        catch (StripeException e)
+        {
+            switch (e.HttpStatusCode)
+            {
+                // Log the error and create a new stripe customer
+                case HttpStatusCode.NotFound:
+                    logger.Error(e.StripeError.Message);
+                    break;
+                // Log the error and throw an exception
+                default:
+                    logger.Error(e.Message);
+                    throw new Exception("An error occurred while getting the stripe customer.");
+            }
+        }
 
-        return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(customerDto));
+        return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity), customerDto);
     }
 
-    private async Task<Stripe.Customer> CreateStripeCustomerAsync(CustomerDto customerDto)
+    private async Task<Stripe.Customer> CreateStripeCustomerAsync(CustomerDto customerDto, CreateCustomerDto createCustomerDto)
     {
-        var addressOptions = GetAddressOptions(customerDto);
-        var shippingOptions = GetShippingOptions(customerDto);
+        var addressOptions = GetAddressOptions(createCustomerDto);
+        var shippingOptions = GetShippingOptions(createCustomerDto);
         var metadata = new Dictionary<string, string>
         {
             { "customer_id", customerDto.Id.ToString() }
@@ -105,13 +125,13 @@ public class CustomerService(
         return await stripeCustomerRepository.CreateAsync(stripeCustomer);
     }
 
-    private AddressOptions GetAddressOptions(CustomerDto customerDto)
-        => mapper.Map<AddressOptions>(customerDto.StripeCustomer.Address);
+    private AddressOptions GetAddressOptions(CreateCustomerDto customerDto)
+        => mapper.Map<AddressOptions>(customerDto.Address);
 
-    private ShippingOptions GetShippingOptions(CustomerDto customerDto)
+    private ShippingOptions GetShippingOptions(CreateCustomerDto customerDto)
         => new()
         {
-            Address = mapper.Map<AddressOptions>(customerDto.StripeCustomer.Shipping),
+            Address = mapper.Map<AddressOptions>(customerDto.Shipping),
             Name = customerDto.FullName()
         };
 

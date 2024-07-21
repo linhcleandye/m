@@ -3,7 +3,8 @@ using Shared.DTOs.Customer.Stripe;
 
 namespace Shared.DTOs.Customer;
 
-public record CustomerDto(int Id, string UserName, string FirstName, string LastName, string EmailAddress, StripeCustomerDto StripeCustomer)
+public record CustomerDto(int Id, string UserName, string FirstName, string LastName, string EmailAddress, 
+    StripeCustomerDto StripeCustomer)
 {
     public string FullName() => $"{FirstName} {LastName}";
     public string? StripeCustomerId { get; set; }
@@ -30,7 +31,7 @@ public record CreateCustomerDto(
 public record UpdateCustomerDto(
     [Required] [StringLength(50)] string FirstName,
     [Required] [StringLength(150)] string LastName,
-    [Required] string StripeCustomerId,
+    [Required] string? StripeCustomerId,
     string? Phone,
     StripeCustomerAddressDto? Address,
     StripeCustomerAddressDto? Shipping

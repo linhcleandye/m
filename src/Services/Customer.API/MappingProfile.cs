@@ -21,7 +21,7 @@ public class MappingProfile : Profile
             .ForPath(dest => dest.StripeCustomer.Phone, opt => opt.MapFrom(src => src.Phone))
             .IgnoreAllNonExisting()
             ;
-        
+
         CreateMap<UpdateCustomerDto, Entities.Customer>()
             .ForMember(dest => dest.StripeCustomerId, opt => opt.Condition(src => src.StripeCustomerId != null))
             .ForPath(dest => dest.StripeCustomer.Address, opt => opt.MapFrom(src => src.Address))
@@ -37,10 +37,24 @@ public class MappingProfile : Profile
             ;
         CreateMap<Address, StripeCustomerAddressDto>();
         CreateMap<Shipping, StripeCustomerAddressDto>();
-          
-        CreateMap<StripeCustomerAddressDto, Address>();
-        CreateMap<StripeCustomerAddressDto, Shipping>();
-        CreateMap<StripeCustomerAddressDto, AddressOptions>();
-        CreateMap<StripeCustomerAddressDto, ShippingOptions>();
+
+        CreateMap<StripeCustomerAddressDto, Address>()
+            .ForMember(dest => dest.Line1, opt => opt.MapFrom(src => src.Street))
+            .ForMember(dest => dest.PostalCode, opt => opt.MapFrom(src => src.Zip))
+            ;
+        CreateMap<StripeCustomerAddressDto, Shipping>()
+            .ForPath(dest => dest.Address.Line1, opt => opt.MapFrom(src => src.Street))
+            .ForPath(dest => dest.Address.City, opt => opt.MapFrom(src => src.City))
+            .ForPath(dest => dest.Address.PostalCode, opt => opt.MapFrom(src => src.Zip))
+            .ForPath(dest => dest.Address.State, opt => opt.MapFrom(src => src.State))
+            ;
+        CreateMap<StripeCustomerAddressDto, AddressOptions>()
+            .ForMember(dest => dest.PostalCode, opt => opt.MapFrom(src => src.Zip))
+            .ForMember(dest => dest.Line1, opt => opt.MapFrom(src => src.Street))
+            ;
+        CreateMap<StripeCustomerAddressDto, ShippingOptions>()
+            .ForPath(dest => dest.Address.PostalCode, opt => opt.MapFrom(src => src.Zip))
+            .ForPath(dest => dest.Address.Line1, opt => opt.MapFrom(src => src.Street))
+            ;
     }
 }
