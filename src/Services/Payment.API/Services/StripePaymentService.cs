@@ -23,9 +23,10 @@ public class StripePaymentService(ILogger logger, ICustomerRepository customerRe
                 "card",
             ],
             Metadata = request.Metadata,
-            CustomerEmail = request.Customer!.Email,
+            CustomerEmail = request.Customer.Email,
             SuccessUrl = request.SuccessRedirectUrl,
             CancelUrl = request.CancelRedirectUrl,
+            
             LineItems = request.Products.Select(lineItem => new SessionLineItemOptions
             {
                 // Using Price and Product IDs on Stripe
@@ -34,7 +35,7 @@ public class StripePaymentService(ILogger logger, ICustomerRepository customerRe
                 PriceData = new SessionLineItemPriceDataOptions
                 {
                     Currency = "aud",
-                    UnitAmountDecimal = lineItem.Price * 100,
+                    UnitAmountDecimal = Math.Round(CalculateUnitAmount(lineItem.Quantity, lineItem.Price, request.GetDeliveryFeePerItem(), request.GetTaxPerItem())),
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
                         Name = lineItem.Name,
@@ -42,7 +43,7 @@ public class StripePaymentService(ILogger logger, ICustomerRepository customerRe
                         Images = [lineItem.ImageUrl],
                     },
                 },
-                Quantity = lineItem.Quantity
+                Quantity = lineItem.Quantity,
             }).ToList()
         };
 
@@ -50,11 +51,21 @@ public class StripePaymentService(ILogger logger, ICustomerRepository customerRe
         logger.Information("Stripe Checkout Session created: {CheckoutSessionId}", checkoutSession.Id);
         return new CreatePaymentResponse(checkoutSession.Url, checkoutSession.Id, stripeCustomer.Id);
     }
+    
+    // Calculate the unit amount for 1 product
+    private decimal CalculateUnitAmount(int quantity, decimal price, decimal deliveryFee, decimal tax = 0)
+    {
+        var subTotal = price * quantity;
+        var totalTax = tax > 0 ? tax : 0;
+        var totalAmount = subTotal + totalTax + deliveryFee;
+        var result = (totalAmount * 100) / quantity;
+
+        return result;
+    }
 
     public async Task<PaymentResponse> GetCheckoutSessionStatusAsync(string sessionId)
     {
-        var options = new SessionGetOptions();
-        var session = await new SessionService().GetAsync(sessionId, options);
+        var session = await new SessionService().GetAsync(sessionId);
         return new PaymentResponse(session.Status, session.PaymentStatus, session.AmountTotal, session.CustomerEmail);
     }
 

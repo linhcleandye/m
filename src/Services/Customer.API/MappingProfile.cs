@@ -14,13 +14,16 @@ public class MappingProfile : Profile
             .ForPath(dest => dest.StripeCustomer, opt => opt.MapFrom(src => src.StripeCustomer))
             ;
         CreateMap<CreateCustomerDto, Entities.Customer>()
+            .ForMember(dest => dest.StripeCustomerId, opt => opt.Condition(src => src.StripeCustomerId != null))
             .ForPath(dest => dest.StripeCustomer.Address, opt => opt.MapFrom(src => src.Address))
             .ForPath(dest => dest.StripeCustomer.Shipping.Address, opt => opt.MapFrom(src => src.Shipping))
             .ForPath(dest => dest.StripeCustomer.Name, opt => opt.MapFrom(src => src.FullName()))
             .ForPath(dest => dest.StripeCustomer.Phone, opt => opt.MapFrom(src => src.Phone))
+            .IgnoreAllNonExisting()
             ;
         
         CreateMap<UpdateCustomerDto, Entities.Customer>()
+            .ForMember(dest => dest.StripeCustomerId, opt => opt.Condition(src => src.StripeCustomerId != null))
             .ForPath(dest => dest.StripeCustomer.Address, opt => opt.MapFrom(src => src.Address))
             .ForPath(dest => dest.StripeCustomer.Shipping.Address, opt => opt.MapFrom(src => src.Shipping))
             .ForPath(dest => dest.StripeCustomer.Name, opt => opt.MapFrom(src => src.FullName))

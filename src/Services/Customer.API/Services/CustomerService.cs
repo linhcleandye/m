@@ -44,8 +44,10 @@ public class CustomerService(
     public async Task<IResult> CreateOrUpdateAsync(CreateCustomerDto customerDto)
     {
         var customerByEmail = await GetCustomerByEmailAsync(customerDto.EmailAddress);
+        var stripeCustomerId = customerByEmail?.StripeCustomerId;
         var entity = mapper.Map<Entities.Customer>(customerDto);
         entity.Id = customerByEmail?.Id ?? 0;
+        entity.StripeCustomerId = customerDto.StripeCustomerId ?? stripeCustomerId;
 
         if (customerByEmail is null)
             await repository.CreateAsync(entity);
@@ -59,26 +61,27 @@ public class CustomerService(
 
     private async Task UpdateStripeCustomerAsync(CreateCustomerDto customerDto, Entities.Customer entity)
     {
-        entity.StripeCustomer = await GetOrCreateStripeCustomerAsync(entity, customerDto.StripeCustomerId);
+        entity.StripeCustomer = await GetOrCreateStripeCustomerAsync(customerDto, customerDto.StripeCustomerId ?? entity.StripeCustomerId);
         entity.StripeCustomerId = entity.StripeCustomer!.Id;
         entity.StripeCustomer.Shipping = new Shipping
         {
             Address = mapper.Map<Address>(customerDto.Shipping)
         };
         entity.StripeCustomer.Phone = entity.StripeCustomer.Shipping.Phone = customerDto.Phone;
+        await repository.UpdateAsync(entity);
     }
 
     private async Task<Stripe.Customer> GetOrCreateStripeCustomerAsync(
-        Entities.Customer entity, string? stripeCustomerId)
+        CreateCustomerDto customerDto, string? stripeCustomerId)
     {
         if (string.IsNullOrEmpty(stripeCustomerId))
-            return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
+            return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(customerDto));
 
         var stripeCustomer = await stripeCustomerRepository.GetByIdAsync(stripeCustomerId);
         if (stripeCustomer?.Deleted != true)
             return stripeCustomer!;
 
-        return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(entity));
+        return await CreateStripeCustomerAsync(mapper.Map<CustomerDto>(customerDto));
     }
 
     private async Task<Stripe.Customer> CreateStripeCustomerAsync(CustomerDto customerDto)

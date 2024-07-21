@@ -22,7 +22,7 @@ public record PaymentCustomerRequest
     public required string Phone { get; set; }
     public StripeCustomerAddressDto? Address { get; set; }
     public StripeCustomerAddressDto? Shipping { get; set; }
-    
+
     public string FullName => $"{FirstName} {LastName}";
 }
 
@@ -30,6 +30,11 @@ public record CreatePaymentRequest
 {
     public required PaymentCustomerRequest Customer { get; set; }
     public List<CheckoutProductRequest> Products { get; set; } = new();
+    public decimal Tax { get; set; }
+    public decimal DeliveryFee { get; set; } 
+    
+    public decimal GetDeliveryFeePerItem() => DeliveryFee > 0 ? DeliveryFee / Products.Count : 0;
+    public decimal GetTaxPerItem() => Tax > 0 ? Tax / Products.Count : 0;
     public Dictionary<string, string>? Metadata { get; set; }
     public string SuccessRedirectUrl { get; set; }
     public string CancelRedirectUrl { get; set; }
