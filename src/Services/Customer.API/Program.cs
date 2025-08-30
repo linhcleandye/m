@@ -26,7 +26,7 @@ try
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
     builder.Services.AddDbContext<CustomerContext>(
-        options => options.UseNpgsql(connectionString));
+    options => options.UseSqlServer(connectionString));
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>()
         .AddScoped(typeof(IRepositoryBaseAsync<,,>), typeof(RepositoryBaseAsync<,,>))
         .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))

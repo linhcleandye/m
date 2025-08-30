@@ -28,14 +28,12 @@ public static class ServiceExtensions
     private static IServiceCollection ConfigureProductDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnectionString");
-        var builder = new MySqlConnectionStringBuilder(connectionString);
-        
-        services.AddDbContext<ProductContext>(m => m.UseMySql(builder.ConnectionString, 
-            ServerVersion.AutoDetect(builder.ConnectionString), e =>
-        {
-            e.MigrationsAssembly("Product.API");
-            e.SchemaBehavior(MySqlSchemaBehavior.Ignore);
-        }));
+
+        services.AddDbContext<ProductContext>(options =>
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.MigrationsAssembly("Product.API");
+            }));
 
         return services;
     }
