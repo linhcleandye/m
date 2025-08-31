@@ -13,7 +13,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog(Serilogger.Configure);
 
-Log.Information("Start Customer Minimal API up");
+Log.Information("Start Customer API up");
 
 try
 {
@@ -26,27 +26,27 @@ try
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
     builder.Services.AddDbContext<CustomerContext>(
-        options => options.UseNpgsql(connectionString));
+    options => options.UseSqlServer(connectionString));
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>()
         .AddScoped(typeof(IRepositoryBaseAsync<,,>), typeof(RepositoryBaseAsync<,,>))
         .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
         .AddScoped<ICustomerService, CustomerService>();
 
+
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
-    app.MapGet("/", () => "Welcome to Customer Minimal API!");
+    app.MapGet("/", () => "Welcome to Customer API!");
+
     app.MapCustomersAPI();
     
-    app.UseSwagger();
-    
-    app.UseSwaggerUI(c =>
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json",
-            "Swagger Customer Minimal API v1");
-    });
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-    // app.UseHttpsRedirection(); //production only
+    app.UseHttpsRedirection();
 
     app.UseAuthorization();
 
@@ -64,6 +64,6 @@ catch (Exception ex)
 }
 finally
 {
-    Log.Information("Shut down Customer Minimal API complete");
+    Log.Information("Shut down Customer API complete");
     Log.CloseAndFlush();
 }
