@@ -38,13 +38,13 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
     
-    [HttpPost(Name = RouteNames.CreateOrder)]
-    [ProducesResponseType(typeof(ApiResult<long>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult<ApiResult<long>>> CreateOrder([FromBody]CreateOrderCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return Ok(result);
-    }
+        [HttpPost(Name = RouteNames.CreateOrder)]
+        [ProducesResponseType(typeof(ApiResult<long>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ApiResult<long>>> CreateOrder([FromBody]CreateOrderCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
     
     [HttpPut("{id:long}",Name = RouteNames.UpdateOrder)]
     [ProducesResponseType(typeof(ApiResult<OrderDto>), (int)HttpStatusCode.OK)]

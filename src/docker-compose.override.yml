@@ -61,7 +61,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings:DefaultConnectionString=Server=sqldb;Database=ProductDb;User Id=sa;Password=Passw0rd!;Multipleactiveresultsets=true;"
+      - "DatabaseSettings:ConnectionString=Server=sqldb;Database=ProductDb;User Id=sa;Password=Passw0rd!;Multipleactiveresultsets=true;"
     depends_on: 
       - sqldb
     ports:
@@ -72,7 +72,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings:DefaultConnectionString=Server=sqldb;Database=CustomerDb;User Id=sa;Password=Passw0rd!;Multipleactiveresultsets=true;"
+      - "DatabaseSettings:ConnectionString=Server=sqldb;Database=CustomerDb;User Id=sa;Password=Passw0rd!;Multipleactiveresultsets=true;"
     depends_on: 
       - sqldb
     ports:
@@ -84,11 +84,13 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - "CacheSettings:ConnectionString=basketdb:6379"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
     depends_on:
       - basketdb
+      - rabbitmq
     ports:
       - "6004:80"
-    restart: alway
+    restart: always
   ordering.api:
     container_name: ordering.api
     environment:
