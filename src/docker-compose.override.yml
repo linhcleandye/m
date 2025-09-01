@@ -94,10 +94,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - "DatabaseSettings:ConnectionString=Server=orderdb;Database=OrderDb;User Id=sa;Password=Passw0rd!;Multipleactiveresultsets=true"
+      - "DatabaseSettings:ConnectionString=Server=sqldb;Database=OrderDb;User Id=sa;Password=Passw0rd!;Multipleactiveresultsets=true"
       - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
     depends_on:
-      - orderdb
+      - sqldb
       - rabbitmq
     ports:
       - "6005:80"
