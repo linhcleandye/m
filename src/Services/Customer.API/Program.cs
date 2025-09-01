@@ -35,7 +35,7 @@ try
         throw new ArgumentNullException("Connection string is not configured.");
 
     builder.Services.AddDbContext<CustomerContext>(
-        options => options.UseNpgsql(databaseSettings.ConnectionString));
+        options => options.UseSqlServer(databaseSettings.ConnectionString));
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>()
         .AddScoped<ICustomerService, CustomerService>();
 

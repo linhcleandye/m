@@ -1,4 +1,4 @@
-using Contracts.Domains.Interfaces;
+﻿using Contracts.Domains.Interfaces;
 using Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
@@ -31,14 +31,17 @@ public static class ServiceExtensions
         var databaseSettings = configuration.GetSection(nameof(DatabaseSettings)).Get<DatabaseSettings>();
         if (databaseSettings == null || string.IsNullOrEmpty(databaseSettings.ConnectionString))
             throw new ArgumentNullException("Connection string is not configured.");
-        
-        var builder = new MySqlConnectionStringBuilder(databaseSettings.ConnectionString);
-        services.AddDbContext<ProductContext>(m => m.UseMySql(builder.ConnectionString, 
-            ServerVersion.AutoDetect(builder.ConnectionString), e =>
-        {
-            e.MigrationsAssembly("Product.API");
-            e.SchemaBehavior(MySqlSchemaBehavior.Ignore);
-        }));
+
+        // SQL Server không cần MySqlConnectionStringBuilder nữa
+        var connectionString = databaseSettings.ConnectionString;
+
+        services.AddDbContext<ProductContext>(options =>
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.MigrationsAssembly("Product.API");
+                // Nếu muốn có thêm tùy chỉnh như Timeout, Retry:
+                // sqlOptions.EnableRetryOnFailure();
+            }));
 
         return services;
     }
