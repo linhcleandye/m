@@ -5,10 +5,10 @@ using Contracts.Common.Interfaces;
 using EventBus.Messages.IntegrationEvents.Events;
 using Infrastructure.Common;
 using Infrastructure.Extensions;
+using Inventory.Grpc.Protos;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shared.Configurations;
-using Inventory.Grpc.Client;
 
 namespace Basket.API.Extensions;
 
@@ -35,12 +35,13 @@ public static class ServiceExtensions
         services.AddScoped<IBasketRepository, BasketRepository>()
             .AddTransient<ISerializeService, SerializeService>();
 
-    public static void ConfigureGrpcService(this IServiceCollection services)
+    public static IServiceCollection ConfigureGrpcService(this IServiceCollection services)
     {
         var settings = services.GetOptions<GrpcSettings>(nameof(GrpcSettings));
         services.AddGrpcClient<StockProtoService.StockProtoServiceClient>(x => 
             x.Address = new Uri(settings.StockUrl));
         services.AddScoped<StockItemGrpcService>();
+        return services;
     }
 
     public static void ConfigureRedis(this IServiceCollection services)
