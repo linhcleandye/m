@@ -22,6 +22,16 @@ services:
     - 27017:27017
     volumes:
     - mongo_data:/data/db
+  hangfiredb:
+    container_name: hangfiredb
+    ports:
+      - '27018:27017'
+    volumes:
+      - hangfire_mongo_data:/data/db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 'admin'
+      MONGO_INITDB_ROOT_PASSWORD: 'admin'
   rabbitmq:
     container_name: rabbitmq
     restart: always

@@ -2,12 +2,15 @@ using Common.Logging;
 using Customer.API;
 using Customer.API.Controllers;
 using Customer.API.Persistence;
+using Customer.API.Extensions;
 using Customer.API.Repositories;
 using Customer.API.Repositories.Interfaces;
 using Customer.API.Services;
 using Customer.API.Services.Interfaces;
 using Infrastructure.Middlewares;
+using Infrastructure.ScheduledJobs;
 using Microsoft.EntityFrameworkCore;
+using Hangfire;
 using Serilog;
 using Shared.Configurations;
 
@@ -21,8 +24,9 @@ Log.Information($"Start {builder.Environment.ApplicationName} up");
 
 try
 {
+    builder.Host.AddAppConfigurations();
     // Add services to the container.
-    builder.Host.UseSerilog(Serilogger.Configure);
+    builder.Services.AddConfigurationSettings(builder.Configuration);
     builder.Services.AddControllers();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -34,10 +38,9 @@ try
     if (databaseSettings == null || string.IsNullOrEmpty(databaseSettings.ConnectionString))
         throw new ArgumentNullException("Connection string is not configured.");
 
-    builder.Services.AddDbContext<CustomerContext>(
-        options => options.UseSqlServer(databaseSettings.ConnectionString));
-    builder.Services.AddScoped<ICustomerRepository, CustomerRepository>()
-        .AddScoped<ICustomerService, CustomerService>();
+    builder.Services.ConfigureCustomerContext();
+    builder.Services.AddInfrastructureServices();
+    builder.Services.AddCuzHangfireService();
 
     var app = builder.Build();
 
@@ -61,6 +64,8 @@ try
     // app.UseHttpsRedirection(); //production only
 
     app.UseAuthorization();
+
+    app.UseHangfireDashboard(builder.Configuration);
 
     app.MapControllers();
 

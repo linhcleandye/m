@@ -6,6 +6,8 @@ services:
     image: redis:alpine
   inventorydb:
     image: mongo
+  hangfiredb:
+    image: mongo
   rabbitmq:
     image: rabbitmq:3-management-alpine
   portainer:
