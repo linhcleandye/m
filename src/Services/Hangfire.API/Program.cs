@@ -22,6 +22,7 @@ try
     builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
     builder.Services.AddCuzHangfireService();
+    builder.Services.ConfigureServices();
 
     var app = builder.Build();
 
