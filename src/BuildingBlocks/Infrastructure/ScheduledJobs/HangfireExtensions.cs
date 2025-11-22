@@ -84,7 +84,23 @@ public static class HangfireExtensions
                 });
                 services.AddHangfireConsoleExtensions();
                 break;
-            
+
+            case "sqlserver":
+                if (string.IsNullOrEmpty(settings.Storage.ConnectionString))
+                    throw new Exception("SQL Server connection string is not provided.");
+
+                services.AddHangfire(x =>
+                    x.UseSqlServerStorage(settings.Storage.ConnectionString, new Hangfire.SqlServer.SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.FromSeconds(15),
+                        UseRecommendedIsolationLevel = true,
+                        UsePageLocksOnDequeue = true,
+                        DisableGlobalLocks = true
+                    })
+                );
+                break;
             case "postgresql":
                 services.AddHangfire(x =>
                     x.UsePostgreSqlStorage(settings.Storage.ConnectionString));

@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   sqldb:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -71,3 +70,5 @@ volumes:
     name: jaeger_data
   mongo_data:
     name: mongo_data
+  hangfire_mongo_data:
+    name: hangfire_mongo_data
