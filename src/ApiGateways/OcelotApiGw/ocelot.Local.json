@@ -148,6 +148,21 @@
       ],
       "SwaggerKey": "basket-service"
     },
+    {
+      "UpstreamPathTemplate": "/baskets/checkout/{username}",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "DownstreamPathTemplate": "/api/baskets/checkout/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "host.docker.internal",
+          "Port": 6004
+        }
+      ],
+      "SwaggerKey": "basket-service"
+    },
     // Order api: http://localhost:5005/api/{version}/orders
     {
       "UpstreamPathTemplate": "/{version}/orders/{id}",

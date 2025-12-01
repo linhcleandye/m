@@ -4,10 +4,13 @@ using AutoMapper;
 using Basket.API.Entities;
 using Basket.API.GrpcServices;
 using Basket.API.Repositories.Interfaces;
+using Basket.API.Services.Interfaces;
 using EventBus.Messages.IntegrationEvents.Events;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using Shared.DTOs.Basket;
+using Shared.Services;
 
 namespace Basket.API.Controllers;
 
@@ -19,7 +22,7 @@ public class BasketsController : ControllerBase
     private readonly IMapper _mapper;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly StockItemGrpcService _stockItemGrpcService;
-
+    
     public BasketsController(IBasketRepository basketRepository, IMapper mapper, IPublishEndpoint publishEndpoint, StockItemGrpcService stockItemGrpcService)
     {
         _basketRepository = basketRepository ?? throw new ArgumentNullException(nameof(basketRepository));
@@ -32,17 +35,18 @@ public class BasketsController : ControllerBase
     [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<Cart>> GetBasket([Required] string username)
     {
-        var result = await _basketRepository.GetBasketByUserName(username);
+        var cart = await _basketRepository.GetBasketByUserName(username);
+        var result = _mapper.Map<CartDto>(cart) ?? new CartDto(username);
 
-        return Ok(result ?? new Cart(username));
+        return Ok(result);
     }
     
     [HttpPost(Name = "UpdateBasket")]
     [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult<Cart>> UpdateBasket([FromBody] Cart cart)
+    public async Task<ActionResult<CartDto>> UpdateBasket([FromBody] CartDto model)
     {
         // Communicate with Inventory.Product.Grpc and check quantity available of products
-        foreach (var item in cart.Items)
+        foreach (var item in model.Items)
         {
             var stock = await _stockItemGrpcService.GetStock(item.ItemNo);
             item.SetAvailableQuantity(stock.Quantity);
@@ -51,8 +55,10 @@ public class BasketsController : ControllerBase
         var options = new DistributedCacheEntryOptions()
             .SetAbsoluteExpiration(DateTime.UtcNow.AddHours(10));
         //     .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-        
-        var result = await _basketRepository.UpdateBasket(cart, options);
+
+        var cart = _mapper.Map<Cart>(model);
+        var updatedCart = await _basketRepository.UpdateBasket(cart, options);
+        var result = _mapper.Map<CartDto>(updatedCart);
         return Ok(result);
     }
     
@@ -64,13 +70,13 @@ public class BasketsController : ControllerBase
         return Ok(result);
     }
 
-    [Route("[action]")]
+    [Route("[action]/{username}")]
     [HttpPost]
     [ProducesResponseType((int)HttpStatusCode.Accepted)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> Checkout([FromBody] BasketCheckout basketCheckout)
+    public async Task<IActionResult> Checkout([Required] string username, [FromBody] BasketCheckout basketCheckout)
     {
-        var basket = await _basketRepository.GetBasketByUserName(basketCheckout.UserName);
+        var basket = await _basketRepository.GetBasketByUserName(username);
         if (basket == null || !basket.Items.Any()) return NotFound();
         
         //publish checkout event to EventBus Message

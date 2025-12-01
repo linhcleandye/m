@@ -1,6 +1,6 @@
 using Common.Logging;
 using Serilog;
-using Shared.Configurations.HangFire;
+using Shared.Configurations;
 
 namespace Hangfire.API.Extensions;
 
@@ -16,16 +16,16 @@ public static class HostExtensions
                 .AddEnvironmentVariables();
         }).UseSerilog(Serilogger.Configure);
     }
-    
-    public static IApplicationBuilder UseHangfireDashboard(this IApplicationBuilder app, IConfiguration configuration)
+
+    internal static IApplicationBuilder UseHangfireDashboard(this IApplicationBuilder app, IConfiguration configuration)
     {
         var configDashboard = configuration.GetSection("HangFireSettings:Dashboard").Get<DashboardOptions>();
-        var hangFireSettings = configuration.GetSection("HangFireSettings").Get<HangFireSettings>();
-        var hangFireRoute = hangFireSettings.Route;
+        var hangfireSettings = configuration.GetSection("HangFireSettings").Get<HangFireSettings>();
+        var hangfireRoute = hangfireSettings.Route;
 
-        app.UseHangfireDashboard(hangFireRoute, new DashboardOptions
+        app.UseHangfireDashboard(hangfireRoute, new DashboardOptions
         {
-            // Authorization = new[] {new HangfireAuthorizationFilter()},
+            Authorization = new [] { new AuthorizationFilter() },
             DashboardTitle = configDashboard.DashboardTitle,
             StatsPollingInterval = configDashboard.StatsPollingInterval,
             AppPath = configDashboard.AppPath,

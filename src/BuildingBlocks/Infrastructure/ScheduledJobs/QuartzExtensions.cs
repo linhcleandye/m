@@ -5,11 +5,12 @@ using Hangfire.Console.Extensions;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using Hangfire.PostgreSql;
 using Infrastructure.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using Shared.Configurations.HangFire;
+using Shared.Configurations;
 
 namespace Infrastructure.ScheduledJobs;
 
